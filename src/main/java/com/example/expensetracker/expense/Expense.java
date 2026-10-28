@@ -4,6 +4,7 @@ import com.example.expensetracker.category.Category;
 import com.example.expensetracker.common.Money;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 public class Expense {
 
@@ -12,35 +13,42 @@ public class Expense {
     private String description;
     private Category category;
 
-    public Money getAmount() {
-        return amount;
+    public Expense(Money amount, LocalDate date, String description, Category category) {
+        this.amount = Objects.requireNonNull(amount, "amount must not be null");
+        this.date = Objects.requireNonNull(date, "date must not be null");
+        this.category = Objects.requireNonNull(category, "category must not be null");
+        this.description = description;
     }
 
-    public void setAmount(Money amount) {
-        this.amount = amount;
+    public Money getAmount() {
+        return amount;
     }
 
     public LocalDate getDate() {
         return date;
     }
 
-    public void setDate(LocalDate date) {
-        this.date = date;
-    }
-
     public String getDescription() {
         return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
     }
 
     public Category getCategory() {
         return category;
     }
 
-    public void setCategory(Category category) {
-        this.category = category;
+    public void changeAmount(Money newAmount) {
+        this.amount = Objects.requireNonNull(newAmount, "amount must not be null");
+    }
+
+    public void reschedule(LocalDate newDate) {
+        this.date = Objects.requireNonNull(newDate, "date must not be null");
+    }
+
+    public void changeDescription(String newDescription) {
+        this.description = newDescription;
+    }
+
+    public void moveTo(Category newCategory) {
+        this.category = Objects.requireNonNull(newCategory, "category must not be null");
     }
 }

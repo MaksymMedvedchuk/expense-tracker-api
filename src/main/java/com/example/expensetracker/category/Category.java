@@ -3,7 +3,7 @@ package com.example.expensetracker.category;
 public class Category {
 
     private String name;
-    private String type;
+    private CategoryType type;
 
     public String getName() {
         return name;
@@ -13,11 +13,11 @@ public class Category {
         this.name = name;
     }
 
-    public String getType() {
+    public CategoryType getType() {
         return type;
     }
 
-    public void setType(String type) {
+    public void setType(CategoryType type) {
         this.type = type;
     }
 }

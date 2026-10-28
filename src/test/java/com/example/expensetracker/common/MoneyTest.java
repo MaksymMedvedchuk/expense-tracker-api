@@ -37,4 +37,20 @@ class MoneyTest {
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("currency must not be null");
     }
+
+    @Test
+    void equalsShouldIgnoreScaleWhenAmountsAreNumericallyEqual() {
+        Money withOneDigit = Money.of("100.0", "UAH");
+        Money withTwoDigits = Money.of("100.00", "UAH");
+
+        assertThat(withOneDigit).isEqualTo(withTwoDigits);
+        assertThat(withOneDigit.hashCode()).isEqualTo(withTwoDigits.hashCode());
+    }
+
+    @Test
+    void constructorShouldRoundToCurrencyScaleWhenAmountHasExtraDigits() {
+        Money money = Money.of("100.005", "UAH");
+
+        assertThat(money.amount()).isEqualTo(new BigDecimal("100.00"));
+    }
 }
