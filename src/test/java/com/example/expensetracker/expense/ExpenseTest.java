@@ -15,7 +15,7 @@ class ExpenseTest {
     private static final LocalDate DATE = LocalDate.of(2026, 10, 1);
 
     @Test
-    void constructorShouldCreateExpenseWithRequiredFields() {
+    void constructorShouldCreateExpenseWhenRequiredFieldsAreProvided() {
         Category category = new Category();
 
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", category);
@@ -27,35 +27,45 @@ class ExpenseTest {
     }
 
     @Test
-    void constructorShouldAllowMissingDescription() {
+    void constructorShouldCreateExpenseWhenDescriptionIsNull() {
         Expense expense = new Expense(AMOUNT, DATE, null, new Category());
 
         assertThat(expense.getDescription()).isNull();
     }
 
     @Test
-    void constructorShouldRejectNullAmount() {
+    void constructorShouldThrowExceptionWhenAmountIsNull() {
         assertThatThrownBy(() -> new Expense(null, DATE, "Coffee", new Category()))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("amount must not be null");
     }
 
     @Test
-    void constructorShouldRejectNullDate() {
+    void constructorShouldThrowExceptionWhenDateIsNull() {
         assertThatThrownBy(() -> new Expense(AMOUNT, null, "Coffee", new Category()))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("date must not be null");
     }
 
     @Test
-    void constructorShouldRejectNullCategory() {
+    void constructorShouldThrowExceptionWhenCategoryIsNull() {
         assertThatThrownBy(() -> new Expense(AMOUNT, DATE, "Coffee", null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("category must not be null");
     }
 
     @Test
-    void changeAmountShouldRejectNull() {
+    void changeAmountShouldReplaceAmountWhenAmountIsProvided() {
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
+        Money newAmount = Money.of("20.00", "UAH");
+
+        expense.changeAmount(newAmount);
+
+        assertThat(expense.getAmount()).isEqualTo(newAmount);
+    }
+
+    @Test
+    void changeAmountShouldThrowExceptionWhenAmountIsNull() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
 
         assertThatThrownBy(() -> expense.changeAmount(null))
@@ -65,16 +75,45 @@ class ExpenseTest {
     }
 
     @Test
-    void rescheduleShouldRejectNull() {
+    void rescheduleShouldChangeDateWhenDateIsProvided() {
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
+        LocalDate newDate = LocalDate.of(2026, 10, 15);
+
+        expense.reschedule(newDate);
+
+        assertThat(expense.getDate()).isEqualTo(newDate);
+    }
+
+    @Test
+    void rescheduleShouldThrowExceptionWhenDateIsNull() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
 
         assertThatThrownBy(() -> expense.reschedule(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("date must not be null");
+        assertThat(expense.getDate()).isEqualTo(DATE);
     }
 
     @Test
-    void moveToShouldChangeCategory() {
+    void changeDescriptionShouldReplaceDescriptionWhenDescriptionIsProvided() {
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
+
+        expense.changeDescription("Tea");
+
+        assertThat(expense.getDescription()).isEqualTo("Tea");
+    }
+
+    @Test
+    void changeDescriptionShouldClearDescriptionWhenDescriptionIsNull() {
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
+
+        expense.changeDescription(null);
+
+        assertThat(expense.getDescription()).isNull();
+    }
+
+    @Test
+    void moveToShouldChangeCategoryWhenCategoryIsProvided() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
         Category newCategory = new Category();
 
@@ -84,11 +123,13 @@ class ExpenseTest {
     }
 
     @Test
-    void moveToShouldRejectNull() {
-        Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
+    void moveToShouldThrowExceptionWhenCategoryIsNull() {
+        Category category = new Category();
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", category);
 
         assertThatThrownBy(() -> expense.moveTo(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("category must not be null");
+        assertThat(expense.getCategory()).isSameAs(category);
     }
 }

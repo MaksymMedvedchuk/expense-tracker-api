@@ -11,28 +11,34 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class MoneyTest {
 
     @Test
-    void ofShouldCreateMoneyFromAmountAndCurrencyCode() {
+    void ofShouldCreateMoneyWhenAmountAndCurrencyCodeAreValid() {
         Money money = Money.of("12.50", "UAH");
 
-        assertThat(money.amount()).isEqualByComparingTo("12.50");
+        assertThat(money.amount()).isEqualTo(new BigDecimal("12.50"));
         assertThat(money.currency()).isEqualTo(Currency.getInstance("UAH"));
     }
 
     @Test
-    void ofShouldRejectUnknownCurrencyCode() {
+    void ofShouldThrowExceptionWhenCurrencyCodeIsUnknown() {
         assertThatThrownBy(() -> Money.of("12.50", "XYZ"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void constructorShouldRejectNullAmount() {
+    void ofShouldThrowExceptionWhenAmountIsNotNumber() {
+        assertThatThrownBy(() -> Money.of("abc", "UAH"))
+                .isInstanceOf(NumberFormatException.class);
+    }
+
+    @Test
+    void constructorShouldThrowExceptionWhenAmountIsNull() {
         assertThatThrownBy(() -> new Money(null, Currency.getInstance("UAH")))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("amount must not be null");
     }
 
     @Test
-    void constructorShouldRejectNullCurrency() {
+    void constructorShouldThrowExceptionWhenCurrencyIsNull() {
         assertThatThrownBy(() -> new Money(BigDecimal.TEN, null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("currency must not be null");
@@ -48,9 +54,45 @@ class MoneyTest {
     }
 
     @Test
+    void equalsShouldReturnFalseWhenCurrenciesDiffer() {
+        Money hryvnias = Money.of("10.00", "UAH");
+        Money dollars = Money.of("10.00", "USD");
+
+        assertThat(hryvnias).isNotEqualTo(dollars);
+    }
+
+    @Test
     void constructorShouldRoundToCurrencyScaleWhenAmountHasExtraDigits() {
         Money money = Money.of("100.005", "UAH");
 
         assertThat(money.amount()).isEqualTo(new BigDecimal("100.00"));
+    }
+
+    @Test
+    void constructorShouldRoundHalfUpWhenPrecedingDigitIsOdd() {
+        Money money = Money.of("100.015", "UAH");
+
+        assertThat(money.amount()).isEqualTo(new BigDecimal("100.02"));
+    }
+
+    @Test
+    void constructorShouldRoundHalfDownWhenPrecedingDigitIsEven() {
+        Money money = Money.of("100.025", "UAH");
+
+        assertThat(money.amount()).isEqualTo(new BigDecimal("100.02"));
+    }
+
+    @Test
+    void constructorShouldUseZeroScaleWhenCurrencyHasNoMinorUnits() {
+        Money money = Money.of("100.4", "JPY");
+
+        assertThat(money.amount()).isEqualTo(new BigDecimal("100"));
+    }
+
+    @Test
+    void constructorShouldUseThreeDigitScaleWhenCurrencyHasThreeMinorUnits() {
+        Money money = Money.of("1.5", "BHD");
+
+        assertThat(money.amount()).isEqualTo(new BigDecimal("1.500"));
     }
 }
