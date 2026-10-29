@@ -80,6 +80,7 @@
         <module name="ModifierOrder"/>
         <module name="MissingSwitchDefault"/>
         <module name="EqualsHashCode"/>
+        <module name="VisibilityModifier"/>
 
         <!-- Indentation -->
         <module name="Indentation">
