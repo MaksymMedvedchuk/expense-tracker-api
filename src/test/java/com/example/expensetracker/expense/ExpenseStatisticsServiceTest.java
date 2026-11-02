@@ -34,4 +34,22 @@ class ExpenseStatisticsServiceTest {
 
         assertThat(total).contains(amount);
     }
+
+    @Test
+    void totalForShouldSumOnlyExpensesWithinPeriodIncludingBoundaries() {
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
+                expenseOn(FROM.minusDays(1), "1000.00"),
+                expenseOn(FROM, "100.00"),
+                expenseOn(LocalDate.of(2026, 11, 15), "20.00"),
+                expenseOn(TO, "3.00"),
+                expenseOn(TO.plusDays(1), "5000.00")));
+
+        Optional<Money> total = service.totalFor(FROM, TO);
+
+        assertThat(total).contains(Money.of("123.00", "UAH"));
+    }
+
+    private static Expense expenseOn(LocalDate date, String amount) {
+        return new Expense(Money.of(amount, "UAH"), date, "Expense", new Category());
+    }
 }
