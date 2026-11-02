@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -68,6 +69,15 @@ class ExpenseStatisticsServiceTest {
         assertThatThrownBy(() -> service.totalFor(FROM, TO))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("currencies must match: UAH and USD");
+    }
+
+    @Test
+    void totalsByCategoryShouldReturnEmptyMapWhenThereAreNoExpenses() {
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
+
+        Map<Category, Money> totals = service.totalsByCategory(FROM, TO);
+
+        assertThat(totals).isEmpty();
     }
 
     private static Expense expenseOn(LocalDate date, String amount) {

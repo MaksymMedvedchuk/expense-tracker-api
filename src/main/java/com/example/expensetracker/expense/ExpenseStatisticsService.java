@@ -1,9 +1,11 @@
 package com.example.expensetracker.expense;
 
+import com.example.expensetracker.category.Category;
 import com.example.expensetracker.common.Money;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class ExpenseStatisticsService {
@@ -20,6 +22,10 @@ public class ExpenseStatisticsService {
                 .filter(expense -> isWithin(expense.getDate(), from, to))
                 .map(Expense::getAmount)
                 .reduce(Money::add);
+    }
+
+    public Map<Category, Money> totalsByCategory(LocalDate from, LocalDate to) {
+        throw new UnsupportedOperationException("not implemented yet");
     }
 
     private static void requireValidPeriod(LocalDate from, LocalDate to) {
