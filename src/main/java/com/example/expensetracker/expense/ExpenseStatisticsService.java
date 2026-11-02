@@ -26,6 +26,7 @@ public class ExpenseStatisticsService {
     }
 
     public Map<Category, Money> totalsByCategory(LocalDate from, LocalDate to) {
+        totalFor(from, to);
         return expensesWithin(from, to)
                 .collect(Collectors.toUnmodifiableMap(Expense::getCategory, Expense::getAmount, Money::add));
     }
