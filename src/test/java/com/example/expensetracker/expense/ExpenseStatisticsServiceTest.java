@@ -1,5 +1,6 @@
 package com.example.expensetracker.expense;
 
+import com.example.expensetracker.category.Category;
 import com.example.expensetracker.common.Money;
 import org.junit.jupiter.api.Test;
 
@@ -21,5 +22,16 @@ class ExpenseStatisticsServiceTest {
         Optional<Money> total = service.totalFor(FROM, TO);
 
         assertThat(total).isEmpty();
+    }
+
+    @Test
+    void totalForShouldReturnAmountWhenThereIsOneExpenseInPeriod() {
+        Money amount = Money.of("150.00", "UAH");
+        Expense expense = new Expense(amount, LocalDate.of(2026, 11, 15), "Lunch", new Category());
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(expense));
+
+        Optional<Money> total = service.totalFor(FROM, TO);
+
+        assertThat(total).contains(amount);
     }
 }
