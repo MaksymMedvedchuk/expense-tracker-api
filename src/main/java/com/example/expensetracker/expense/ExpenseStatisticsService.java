@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class ExpenseStatisticsService {
 
@@ -18,18 +19,20 @@ public class ExpenseStatisticsService {
     }
 
     public Optional<Money> totalFor(LocalDate from, LocalDate to) {
-        requireValidPeriod(from, to);
-        return expenses.stream()
-                .filter(expense -> isWithin(expense.getDate(), from, to))
+        return expensesWithin(from, to)
                 .map(Expense::getAmount)
                 .reduce(Money::add);
     }
 
     public Map<Category, Money> totalsByCategory(LocalDate from, LocalDate to) {
+        return expensesWithin(from, to)
+                .collect(Collectors.toUnmodifiableMap(Expense::getCategory, Expense::getAmount, Money::add));
+    }
+
+    private Stream<Expense> expensesWithin(LocalDate from, LocalDate to) {
         requireValidPeriod(from, to);
         return expenses.stream()
-                .filter(expense -> isWithin(expense.getDate(), from, to))
-                .collect(Collectors.toUnmodifiableMap(Expense::getCategory, Expense::getAmount, Money::add));
+                .filter(expense -> isWithin(expense.getDate(), from, to));
     }
 
     private static void requireValidPeriod(LocalDate from, LocalDate to) {
