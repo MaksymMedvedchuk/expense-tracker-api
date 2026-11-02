@@ -15,9 +15,17 @@ public class ExpenseStatisticsService {
     }
 
     public Optional<Money> totalFor(LocalDate from, LocalDate to) {
-        if (expenses.isEmpty()) {
-            return Optional.empty();
+        Money total = null;
+        for (Expense expense : expenses) {
+            LocalDate date = expense.getDate();
+            if (!date.isBefore(from) && !date.isAfter(to)) {
+                if (total == null) {
+                    total = expense.getAmount();
+                } else {
+                    total = total.add(expense.getAmount());
+                }
+            }
         }
-        return Optional.of(expenses.get(0).getAmount());
+        return Optional.ofNullable(total);
     }
 }
