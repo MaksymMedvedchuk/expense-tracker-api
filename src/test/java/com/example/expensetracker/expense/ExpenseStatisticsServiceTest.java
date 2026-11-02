@@ -94,6 +94,20 @@ class ExpenseStatisticsServiceTest {
                 categoryNamed("Transport"), Money.of("200.00", "UAH")));
     }
 
+    @Test
+    void totalsByCategoryShouldIgnoreExpensesOutsidePeriod() {
+        Category food = categoryNamed("Food");
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
+                new Expense(Money.of("1000.00", "UAH"), FROM.minusDays(1), "Before", food),
+                new Expense(Money.of("100.00", "UAH"), FROM, "First day", food),
+                new Expense(Money.of("20.00", "UAH"), TO, "Last day", food),
+                new Expense(Money.of("5000.00", "UAH"), TO.plusDays(1), "After", categoryNamed("Travel"))));
+
+        Map<Category, Money> totals = service.totalsByCategory(FROM, TO);
+
+        assertThat(totals).containsExactlyEntriesOf(Map.of(food, Money.of("120.00", "UAH")));
+    }
+
     private static Expense expenseOn(LocalDate date, String amount) {
         return new Expense(Money.of(amount, "UAH"), date, "Expense", new Category());
     }
