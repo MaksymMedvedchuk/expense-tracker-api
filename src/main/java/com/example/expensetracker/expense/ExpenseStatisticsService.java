@@ -15,17 +15,13 @@ public class ExpenseStatisticsService {
     }
 
     public Optional<Money> totalFor(LocalDate from, LocalDate to) {
-        Money total = null;
-        for (Expense expense : expenses) {
-            LocalDate date = expense.getDate();
-            if (!date.isBefore(from) && !date.isAfter(to)) {
-                if (total == null) {
-                    total = expense.getAmount();
-                } else {
-                    total = total.add(expense.getAmount());
-                }
-            }
-        }
-        return Optional.ofNullable(total);
+        return expenses.stream()
+                .filter(expense -> isWithin(expense.getDate(), from, to))
+                .map(Expense::getAmount)
+                .reduce(Money::add);
+    }
+
+    private static boolean isWithin(LocalDate date, LocalDate from, LocalDate to) {
+        return !date.isBefore(from) && !date.isAfter(to);
     }
 }
