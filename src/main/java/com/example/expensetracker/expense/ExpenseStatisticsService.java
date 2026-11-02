@@ -4,6 +4,7 @@ import com.example.expensetracker.category.Category;
 import com.example.expensetracker.common.Money;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -30,7 +31,8 @@ public class ExpenseStatisticsService {
     }
 
     public Optional<Money> averagePerDay(LocalDate from, LocalDate to) {
-        return Optional.empty();
+        long days = ChronoUnit.DAYS.between(from, to) + 1;
+        return totalFor(from, to).map(total -> total.divide(days));
     }
 
     private Stream<Expense> expensesWithin(LocalDate from, LocalDate to) {
