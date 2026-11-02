@@ -15,6 +15,6 @@ public class ExpenseStatisticsService {
     }
 
     public Optional<Money> totalFor(LocalDate from, LocalDate to) {
-        throw new UnsupportedOperationException("not implemented yet");
+        return Optional.empty();
     }
 }
