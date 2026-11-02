@@ -42,8 +42,10 @@ Code style is checked by Checkstyle as part of `./gradlew build` — any violati
 
 Tests use JUnit 5 and AssertJ (no `assertEquals` / Hamcrest). They run with `./gradlew test` locally and as part of `./gradlew build` in CI.
 
-- **Naming:** `methodNameShouldExpectedBehaviorWhenCondition`, camelCase without underscores, e.g.
-  `constructorShouldThrowExceptionWhenAmountIsNull`, `equalsShouldIgnoreScaleWhenAmountsAreNumericallyEqual`
+- **Naming:** `methodName_shouldExpectedBehavior_whenCondition` — hybrid snake_case: camelCase parts separated by `_`,
+  e.g. `constructor_shouldThrowException_whenAmountIsNull`, `equals_shouldIgnoreScale_whenAmountsAreNumericallyEqual`.
+  `_whenCondition` may be omitted when there is no condition. Helper methods in tests stay plain camelCase.
+  Checkstyle allows `_` in method names only under `src/test`.
 - **Structure:** given / when / then, separated by blank lines, without `// given` comments.
   For exceptions use `assertThatThrownBy`, which combines when and then.
 - **One logical assert block:** several `assertThat` in a row are fine if they verify one behavior.

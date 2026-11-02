@@ -24,7 +24,7 @@ class InfoEndpointTest {
     private BuildProperties buildProperties;
 
     @Test
-    void getInfoShouldReturnApplicationNameAndVersion() throws Exception {
+    void getInfo_shouldReturnApplicationNameAndVersion() throws Exception {
         mockMvc.perform(get("/api/v1/info"))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON))

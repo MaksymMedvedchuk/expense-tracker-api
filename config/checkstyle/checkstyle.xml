@@ -15,6 +15,16 @@
 
     <module name="SuppressWarningsFilter"/>
 
+    <!-- Method names: camelCase in main, methodName_shouldBehavior_whenCondition allowed in tests -->
+    <module name="SuppressionSingleFilter">
+        <property name="id" value="methodNameMain"/>
+        <property name="files" value="[\\/]src[\\/]test[\\/]"/>
+    </module>
+    <module name="SuppressionSingleFilter">
+        <property name="id" value="methodNameTest"/>
+        <property name="files" value="[\\/]src[\\/]main[\\/]"/>
+    </module>
+
     <module name="FileTabCharacter">
         <property name="eachLine" value="true"/>
     </module>
@@ -33,7 +43,12 @@
         </module>
         <module name="TypeName"/>
         <module name="MethodName">
+            <property name="id" value="methodNameMain"/>
             <property name="format" value="^[a-z][a-zA-Z0-9]*$"/>
+        </module>
+        <module name="MethodName">
+            <property name="id" value="methodNameTest"/>
+            <property name="format" value="^[a-z][a-zA-Z0-9]*(_[a-z][a-zA-Z0-9]*)*$"/>
         </module>
         <module name="MemberName">
             <property name="format" value="^[a-z][a-z0-9][a-zA-Z0-9]*$"/>

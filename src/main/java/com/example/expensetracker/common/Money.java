@@ -16,4 +16,22 @@ public record Money(BigDecimal amount, Currency currency) {
     public static Money of(String amount, String currencyCode) {
         return new Money(new BigDecimal(amount), Currency.getInstance(currencyCode));
     }
+
+    public Money add(Money other) {
+        requireSameCurrency(other);
+        return new Money(amount.add(other.amount), currency);
+    }
+
+    public Money divide(long divisor) {
+        BigDecimal quotient = amount.divide(
+                BigDecimal.valueOf(divisor), currency.getDefaultFractionDigits(), RoundingMode.HALF_EVEN);
+        return new Money(quotient, currency);
+    }
+
+    private void requireSameCurrency(Money other) {
+        if (!currency.equals(other.currency)) {
+            throw new IllegalArgumentException(
+                    "currencies must match: " + currency + " and " + other.currency);
+        }
+    }
 }
