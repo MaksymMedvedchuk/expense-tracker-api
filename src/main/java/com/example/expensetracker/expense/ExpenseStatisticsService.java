@@ -15,6 +15,9 @@ public class ExpenseStatisticsService {
     }
 
     public Optional<Money> totalFor(LocalDate from, LocalDate to) {
+        if (from.isAfter(to)) {
+            throw new IllegalArgumentException("from must not be after to: " + from + " > " + to);
+        }
         return expenses.stream()
                 .filter(expense -> isWithin(expense.getDate(), from, to))
                 .map(Expense::getAmount)
