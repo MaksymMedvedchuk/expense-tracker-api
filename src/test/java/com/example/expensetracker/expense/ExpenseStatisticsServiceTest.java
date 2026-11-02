@@ -126,6 +126,18 @@ class ExpenseStatisticsServiceTest {
         assertThat(average).isEmpty();
     }
 
+    @Test
+    void averagePerDayShouldDivideTotalByAllDaysInPeriodIncludingDaysWithoutExpenses() {
+        LocalDate tenthDay = FROM.plusDays(9);
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
+                expenseOn(FROM, "400.00"),
+                expenseOn(tenthDay, "600.00")));
+
+        Optional<Money> average = service.averagePerDay(FROM, tenthDay);
+
+        assertThat(average).contains(Money.of("100.00", "UAH"));
+    }
+
     private static Expense expenseOn(LocalDate date, String amount) {
         return new Expense(Money.of(amount, "UAH"), date, "Expense", new Category());
     }
