@@ -31,8 +31,7 @@ public class ExpenseStatisticsService {
     }
 
     public Optional<Money> averagePerDay(LocalDate from, LocalDate to) {
-        long days = ChronoUnit.DAYS.between(from, to) + 1;
-        return totalFor(from, to).map(total -> total.divide(days));
+        return totalFor(from, to).map(total -> total.divide(daysInclusive(from, to)));
     }
 
     private Stream<Expense> expensesWithin(LocalDate from, LocalDate to) {
@@ -45,6 +44,10 @@ public class ExpenseStatisticsService {
         if (from.isAfter(to)) {
             throw new IllegalArgumentException("from must not be after to: " + from + " > " + to);
         }
+    }
+
+    private static long daysInclusive(LocalDate from, LocalDate to) {
+        return ChronoUnit.DAYS.between(from, to) + 1;
     }
 
     private static boolean isWithin(LocalDate date, LocalDate from, LocalDate to) {
