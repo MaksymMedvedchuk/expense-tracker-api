@@ -138,6 +138,15 @@ class ExpenseStatisticsServiceTest {
         assertThat(average).contains(Money.of("100.00", "UAH"));
     }
 
+    @Test
+    void averagePerDayShouldThrowExceptionWhenFromIsAfterTo() {
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
+
+        assertThatThrownBy(() -> service.averagePerDay(TO, FROM))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("from must not be after to: 2026-11-30 > 2026-11-01");
+    }
+
     private static Expense expenseOn(LocalDate date, String amount) {
         return new Expense(Money.of(amount, "UAH"), date, "Expense", new Category());
     }
