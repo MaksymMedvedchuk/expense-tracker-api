@@ -18,6 +18,10 @@ public record Money(BigDecimal amount, Currency currency) {
     }
 
     public Money add(Money other) {
+        if (!currency.equals(other.currency)) {
+            throw new IllegalArgumentException(
+                    "currencies must match: " + currency + " and " + other.currency);
+        }
         return new Money(amount.add(other.amount), currency);
     }
 }
