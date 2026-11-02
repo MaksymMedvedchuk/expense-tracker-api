@@ -7,7 +7,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CategoryTest {
 
     @Test
-    void equalsShouldReturnTrueWhenNamesAreEqual() {
+    void equals_shouldReturnTrue_whenNamesAreEqual() {
         Category first = categoryNamed("Food");
         Category second = categoryNamed("Food");
 

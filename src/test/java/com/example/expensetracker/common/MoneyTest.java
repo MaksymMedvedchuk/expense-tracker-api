@@ -11,7 +11,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class MoneyTest {
 
     @Test
-    void ofShouldCreateMoneyWhenAmountAndCurrencyCodeAreValid() {
+    void of_shouldCreateMoney_whenAmountAndCurrencyCodeAreValid() {
         Money money = Money.of("12.50", "UAH");
 
         assertThat(money.amount()).isEqualTo(new BigDecimal("12.50"));
@@ -19,33 +19,33 @@ class MoneyTest {
     }
 
     @Test
-    void ofShouldThrowExceptionWhenCurrencyCodeIsUnknown() {
+    void of_shouldThrowException_whenCurrencyCodeIsUnknown() {
         assertThatThrownBy(() -> Money.of("12.50", "XYZ"))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
-    void ofShouldThrowExceptionWhenAmountIsNotNumber() {
+    void of_shouldThrowException_whenAmountIsNotNumber() {
         assertThatThrownBy(() -> Money.of("abc", "UAH"))
                 .isInstanceOf(NumberFormatException.class);
     }
 
     @Test
-    void constructorShouldThrowExceptionWhenAmountIsNull() {
+    void constructor_shouldThrowException_whenAmountIsNull() {
         assertThatThrownBy(() -> new Money(null, Currency.getInstance("UAH")))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("amount must not be null");
     }
 
     @Test
-    void constructorShouldThrowExceptionWhenCurrencyIsNull() {
+    void constructor_shouldThrowException_whenCurrencyIsNull() {
         assertThatThrownBy(() -> new Money(BigDecimal.TEN, null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("currency must not be null");
     }
 
     @Test
-    void equalsShouldIgnoreScaleWhenAmountsAreNumericallyEqual() {
+    void equals_shouldIgnoreScale_whenAmountsAreNumericallyEqual() {
         Money withOneDigit = Money.of("100.0", "UAH");
         Money withTwoDigits = Money.of("100.00", "UAH");
 
@@ -54,7 +54,7 @@ class MoneyTest {
     }
 
     @Test
-    void equalsShouldReturnFalseWhenCurrenciesDiffer() {
+    void equals_shouldReturnFalse_whenCurrenciesDiffer() {
         Money hryvnias = Money.of("10.00", "UAH");
         Money dollars = Money.of("10.00", "USD");
 
@@ -62,42 +62,42 @@ class MoneyTest {
     }
 
     @Test
-    void constructorShouldRoundToCurrencyScaleWhenAmountHasExtraDigits() {
+    void constructor_shouldRoundToCurrencyScale_whenAmountHasExtraDigits() {
         Money money = Money.of("100.005", "UAH");
 
         assertThat(money.amount()).isEqualTo(new BigDecimal("100.00"));
     }
 
     @Test
-    void constructorShouldRoundHalfUpWhenPrecedingDigitIsOdd() {
+    void constructor_shouldRoundHalfUp_whenPrecedingDigitIsOdd() {
         Money money = Money.of("100.015", "UAH");
 
         assertThat(money.amount()).isEqualTo(new BigDecimal("100.02"));
     }
 
     @Test
-    void constructorShouldRoundHalfDownWhenPrecedingDigitIsEven() {
+    void constructor_shouldRoundHalfDown_whenPrecedingDigitIsEven() {
         Money money = Money.of("100.025", "UAH");
 
         assertThat(money.amount()).isEqualTo(new BigDecimal("100.02"));
     }
 
     @Test
-    void constructorShouldUseZeroScaleWhenCurrencyHasNoMinorUnits() {
+    void constructor_shouldUseZeroScale_whenCurrencyHasNoMinorUnits() {
         Money money = Money.of("100.4", "JPY");
 
         assertThat(money.amount()).isEqualTo(new BigDecimal("100"));
     }
 
     @Test
-    void constructorShouldUseThreeDigitScaleWhenCurrencyHasThreeMinorUnits() {
+    void constructor_shouldUseThreeDigitScale_whenCurrencyHasThreeMinorUnits() {
         Money money = Money.of("1.5", "BHD");
 
         assertThat(money.amount()).isEqualTo(new BigDecimal("1.500"));
     }
 
     @Test
-    void addShouldReturnSumWhenCurrenciesAreEqual() {
+    void add_shouldReturnSum_whenCurrenciesAreEqual() {
         Money first = Money.of("100.50", "UAH");
         Money second = Money.of("20.25", "UAH");
 
@@ -107,7 +107,7 @@ class MoneyTest {
     }
 
     @Test
-    void addShouldThrowExceptionWhenCurrenciesDiffer() {
+    void add_shouldThrowException_whenCurrenciesDiffer() {
         Money hryvnias = Money.of("100.00", "UAH");
         Money dollars = Money.of("10.00", "USD");
 
@@ -117,7 +117,7 @@ class MoneyTest {
     }
 
     @Test
-    void divideShouldRoundToCurrencyScaleWhenResultHasInfiniteFraction() {
+    void divide_shouldRoundToCurrencyScale_whenResultHasInfiniteFraction() {
         Money money = Money.of("100.00", "UAH");
 
         Money result = money.divide(3);

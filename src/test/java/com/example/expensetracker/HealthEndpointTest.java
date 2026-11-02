@@ -18,7 +18,7 @@ class HealthEndpointTest {
     private MockMvc mockMvc;
 
     @Test
-    void getHealthShouldReturnUpWhenApplicationIsRunning() throws Exception {
+    void getHealth_shouldReturnUp_whenApplicationIsRunning() throws Exception {
         mockMvc.perform(get("/actuator/health"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.status").value("UP"));

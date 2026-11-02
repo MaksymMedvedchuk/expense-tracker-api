@@ -15,7 +15,7 @@ class ExpenseTest {
     private static final LocalDate DATE = LocalDate.of(2026, 10, 1);
 
     @Test
-    void constructorShouldCreateExpenseWhenRequiredFieldsAreProvided() {
+    void constructor_shouldCreateExpense_whenRequiredFieldsAreProvided() {
         Category category = new Category();
 
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", category);
@@ -27,35 +27,35 @@ class ExpenseTest {
     }
 
     @Test
-    void constructorShouldCreateExpenseWhenDescriptionIsNull() {
+    void constructor_shouldCreateExpense_whenDescriptionIsNull() {
         Expense expense = new Expense(AMOUNT, DATE, null, new Category());
 
         assertThat(expense.getDescription()).isNull();
     }
 
     @Test
-    void constructorShouldThrowExceptionWhenAmountIsNull() {
+    void constructor_shouldThrowException_whenAmountIsNull() {
         assertThatThrownBy(() -> new Expense(null, DATE, "Coffee", new Category()))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("amount must not be null");
     }
 
     @Test
-    void constructorShouldThrowExceptionWhenDateIsNull() {
+    void constructor_shouldThrowException_whenDateIsNull() {
         assertThatThrownBy(() -> new Expense(AMOUNT, null, "Coffee", new Category()))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("date must not be null");
     }
 
     @Test
-    void constructorShouldThrowExceptionWhenCategoryIsNull() {
+    void constructor_shouldThrowException_whenCategoryIsNull() {
         assertThatThrownBy(() -> new Expense(AMOUNT, DATE, "Coffee", null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("category must not be null");
     }
 
     @Test
-    void changeAmountShouldReplaceAmountWhenAmountIsProvided() {
+    void changeAmount_shouldReplaceAmount_whenAmountIsProvided() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
         Money newAmount = Money.of("20.00", "UAH");
 
@@ -65,7 +65,7 @@ class ExpenseTest {
     }
 
     @Test
-    void changeAmountShouldThrowExceptionWhenAmountIsNull() {
+    void changeAmount_shouldThrowException_whenAmountIsNull() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
 
         assertThatThrownBy(() -> expense.changeAmount(null))
@@ -75,7 +75,7 @@ class ExpenseTest {
     }
 
     @Test
-    void rescheduleShouldChangeDateWhenDateIsProvided() {
+    void reschedule_shouldChangeDate_whenDateIsProvided() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
         LocalDate newDate = LocalDate.of(2026, 10, 15);
 
@@ -85,7 +85,7 @@ class ExpenseTest {
     }
 
     @Test
-    void rescheduleShouldThrowExceptionWhenDateIsNull() {
+    void reschedule_shouldThrowException_whenDateIsNull() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
 
         assertThatThrownBy(() -> expense.reschedule(null))
@@ -95,7 +95,7 @@ class ExpenseTest {
     }
 
     @Test
-    void changeDescriptionShouldReplaceDescriptionWhenDescriptionIsProvided() {
+    void changeDescription_shouldReplaceDescription_whenDescriptionIsProvided() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
 
         expense.changeDescription("Tea");
@@ -104,7 +104,7 @@ class ExpenseTest {
     }
 
     @Test
-    void changeDescriptionShouldClearDescriptionWhenDescriptionIsNull() {
+    void changeDescription_shouldClearDescription_whenDescriptionIsNull() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
 
         expense.changeDescription(null);
@@ -113,7 +113,7 @@ class ExpenseTest {
     }
 
     @Test
-    void moveToShouldChangeCategoryWhenCategoryIsProvided() {
+    void moveTo_shouldChangeCategory_whenCategoryIsProvided() {
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", new Category());
         Category newCategory = new Category();
 
@@ -123,7 +123,7 @@ class ExpenseTest {
     }
 
     @Test
-    void moveToShouldThrowExceptionWhenCategoryIsNull() {
+    void moveTo_shouldThrowException_whenCategoryIsNull() {
         Category category = new Category();
         Expense expense = new Expense(AMOUNT, DATE, "Coffee", category);
 

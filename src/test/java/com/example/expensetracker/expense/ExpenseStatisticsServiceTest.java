@@ -18,7 +18,7 @@ class ExpenseStatisticsServiceTest {
     private static final LocalDate TO = LocalDate.of(2026, 11, 30);
 
     @Test
-    void totalForShouldReturnEmptyWhenThereAreNoExpenses() {
+    void totalFor_shouldReturnEmpty_whenThereAreNoExpenses() {
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
 
         Optional<Money> total = service.totalFor(FROM, TO);
@@ -27,7 +27,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalForShouldReturnAmountWhenThereIsOneExpenseInPeriod() {
+    void totalFor_shouldReturnAmount_whenThereIsOneExpenseInPeriod() {
         Money amount = Money.of("150.00", "UAH");
         Expense expense = new Expense(amount, LocalDate.of(2026, 11, 15), "Lunch", new Category());
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(expense));
@@ -38,7 +38,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalForShouldSumOnlyExpensesWithinPeriodIncludingBoundaries() {
+    void totalFor_shouldSumOnlyExpensesWithinPeriodIncludingBoundaries() {
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
                 expenseOn(FROM.minusDays(1), "1000.00"),
                 expenseOn(FROM, "100.00"),
@@ -52,7 +52,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalForShouldThrowExceptionWhenFromIsAfterTo() {
+    void totalFor_shouldThrowException_whenFromIsAfterTo() {
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
 
         assertThatThrownBy(() -> service.totalFor(TO, FROM))
@@ -61,7 +61,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalForShouldThrowExceptionWhenExpensesHaveDifferentCurrencies() {
+    void totalFor_shouldThrowException_whenExpensesHaveDifferentCurrencies() {
         Expense inHryvnias = new Expense(Money.of("100.00", "UAH"), FROM, "Taxi", new Category());
         Expense inDollars = new Expense(Money.of("10.00", "USD"), TO, "Book", new Category());
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(inHryvnias, inDollars));
@@ -72,7 +72,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalsByCategoryShouldReturnEmptyMapWhenThereAreNoExpenses() {
+    void totalsByCategory_shouldReturnEmptyMap_whenThereAreNoExpenses() {
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
 
         Map<Category, Money> totals = service.totalsByCategory(FROM, TO);
@@ -81,7 +81,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalsByCategoryShouldSumExpensesPerCategoryWhenCategoriesAreEqualByName() {
+    void totalsByCategory_shouldSumExpensesPerCategory_whenCategoriesAreEqualByName() {
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
                 expenseIn("Food", "150.00"),
                 expenseIn("Transport", "200.00"),
@@ -95,7 +95,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalsByCategoryShouldIgnoreExpensesOutsidePeriod() {
+    void totalsByCategory_shouldIgnoreExpensesOutsidePeriod() {
         Category food = categoryNamed("Food");
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
                 new Expense(Money.of("1000.00", "UAH"), FROM.minusDays(1), "Before", food),
@@ -109,7 +109,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalsByCategoryShouldThrowExceptionWhenFromIsAfterTo() {
+    void totalsByCategory_shouldThrowException_whenFromIsAfterTo() {
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
 
         assertThatThrownBy(() -> service.totalsByCategory(TO, FROM))
@@ -118,7 +118,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void averagePerDayShouldReturnEmptyWhenThereAreNoExpenses() {
+    void averagePerDay_shouldReturnEmpty_whenThereAreNoExpenses() {
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
 
         Optional<Money> average = service.averagePerDay(FROM, TO);
@@ -127,7 +127,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void averagePerDayShouldDivideTotalByAllDaysInPeriodIncludingDaysWithoutExpenses() {
+    void averagePerDay_shouldDivideTotalByAllDaysInPeriodIncludingDaysWithoutExpenses() {
         LocalDate tenthDay = FROM.plusDays(9);
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
                 expenseOn(FROM, "400.00"),
@@ -139,7 +139,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void averagePerDayShouldThrowExceptionWhenFromIsAfterTo() {
+    void averagePerDay_shouldThrowException_whenFromIsAfterTo() {
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
 
         assertThatThrownBy(() -> service.averagePerDay(TO, FROM))
