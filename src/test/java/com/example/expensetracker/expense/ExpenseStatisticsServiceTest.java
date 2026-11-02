@@ -59,6 +59,17 @@ class ExpenseStatisticsServiceTest {
                 .hasMessage("from must not be after to: 2026-11-30 > 2026-11-01");
     }
 
+    @Test
+    void totalForShouldThrowExceptionWhenExpensesHaveDifferentCurrencies() {
+        Expense inHryvnias = new Expense(Money.of("100.00", "UAH"), FROM, "Taxi", new Category());
+        Expense inDollars = new Expense(Money.of("10.00", "USD"), TO, "Book", new Category());
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(inHryvnias, inDollars));
+
+        assertThatThrownBy(() -> service.totalFor(FROM, TO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("currencies must match: UAH and USD");
+    }
+
     private static Expense expenseOn(LocalDate date, String amount) {
         return new Expense(Money.of(amount, "UAH"), date, "Expense", new Category());
     }
