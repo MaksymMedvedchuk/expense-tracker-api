@@ -80,7 +80,31 @@ class ExpenseStatisticsServiceTest {
         assertThat(totals).isEmpty();
     }
 
+    @Test
+    void totalsByCategoryShouldSumExpensesPerCategoryWhenCategoriesAreEqualByName() {
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
+                expenseIn("Food", "150.00"),
+                expenseIn("Transport", "200.00"),
+                expenseIn("Food", "300.00")));
+
+        Map<Category, Money> totals = service.totalsByCategory(FROM, TO);
+
+        assertThat(totals).containsExactlyInAnyOrderEntriesOf(Map.of(
+                categoryNamed("Food"), Money.of("450.00", "UAH"),
+                categoryNamed("Transport"), Money.of("200.00", "UAH")));
+    }
+
     private static Expense expenseOn(LocalDate date, String amount) {
         return new Expense(Money.of(amount, "UAH"), date, "Expense", new Category());
+    }
+
+    private static Expense expenseIn(String categoryName, String amount) {
+        return new Expense(Money.of(amount, "UAH"), FROM, "Expense", categoryNamed(categoryName));
+    }
+
+    private static Category categoryNamed(String name) {
+        Category category = new Category();
+        category.setName(name);
+        return category;
     }
 }
