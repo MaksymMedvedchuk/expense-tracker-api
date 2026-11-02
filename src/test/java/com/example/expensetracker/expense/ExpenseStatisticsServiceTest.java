@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class ExpenseStatisticsServiceTest {
 
@@ -47,6 +48,15 @@ class ExpenseStatisticsServiceTest {
         Optional<Money> total = service.totalFor(FROM, TO);
 
         assertThat(total).contains(Money.of("123.00", "UAH"));
+    }
+
+    @Test
+    void totalForShouldThrowExceptionWhenFromIsAfterTo() {
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
+
+        assertThatThrownBy(() -> service.totalFor(TO, FROM))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("from must not be after to: 2026-11-30 > 2026-11-01");
     }
 
     private static Expense expenseOn(LocalDate date, String amount) {
