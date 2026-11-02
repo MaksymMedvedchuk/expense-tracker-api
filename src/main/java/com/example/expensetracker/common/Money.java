@@ -18,6 +18,6 @@ public record Money(BigDecimal amount, Currency currency) {
     }
 
     public Money add(Money other) {
-        throw new UnsupportedOperationException("not implemented yet");
+        return new Money(amount.add(other.amount), currency);
     }
 }
