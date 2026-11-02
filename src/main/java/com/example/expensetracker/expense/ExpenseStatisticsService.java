@@ -5,6 +5,7 @@ import com.example.expensetracker.common.Money;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Currency;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -26,7 +27,6 @@ public class ExpenseStatisticsService {
     }
 
     public Map<Category, Money> totalsByCategory(LocalDate from, LocalDate to) {
-        totalFor(from, to);
         return expensesWithin(from, to)
                 .collect(Collectors.toUnmodifiableMap(Expense::getCategory, Expense::getAmount, Money::add));
     }
@@ -37,8 +37,22 @@ public class ExpenseStatisticsService {
 
     private Stream<Expense> expensesWithin(LocalDate from, LocalDate to) {
         requireValidPeriod(from, to);
-        return expenses.stream()
-                .filter(expense -> isWithin(expense.getDate(), from, to));
+        List<Expense> within = expenses.stream()
+                .filter(expense -> isWithin(expense.getDate(), from, to))
+                .toList();
+        requireSingleCurrency(within);
+        return within.stream();
+    }
+
+    private static void requireSingleCurrency(List<Expense> expenses) {
+        List<Currency> currencies = expenses.stream()
+                .map(expense -> expense.getAmount().currency())
+                .distinct()
+                .toList();
+        if (currencies.size() > 1) {
+            throw new IllegalArgumentException(
+                    "currencies must match: " + currencies.get(0) + " and " + currencies.get(1));
+        }
     }
 
     private static void requireValidPeriod(LocalDate from, LocalDate to) {
