@@ -16,4 +16,8 @@ public record Money(BigDecimal amount, Currency currency) {
     public static Money of(String amount, String currencyCode) {
         return new Money(new BigDecimal(amount), Currency.getInstance(currencyCode));
     }
+
+    public Money add(Money other) {
+        throw new UnsupportedOperationException("not implemented yet");
+    }
 }

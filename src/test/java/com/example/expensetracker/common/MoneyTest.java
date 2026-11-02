@@ -95,4 +95,14 @@ class MoneyTest {
 
         assertThat(money.amount()).isEqualTo(new BigDecimal("1.500"));
     }
+
+    @Test
+    void addShouldReturnSumWhenCurrenciesAreEqual() {
+        Money first = Money.of("100.50", "UAH");
+        Money second = Money.of("20.25", "UAH");
+
+        Money sum = first.add(second);
+
+        assertThat(sum).isEqualTo(Money.of("120.75", "UAH"));
+    }
 }
