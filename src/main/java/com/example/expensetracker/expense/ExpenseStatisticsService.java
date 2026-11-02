@@ -27,6 +27,7 @@ public class ExpenseStatisticsService {
 
     public Map<Category, Money> totalsByCategory(LocalDate from, LocalDate to) {
         return expenses.stream()
+                .filter(expense -> isWithin(expense.getDate(), from, to))
                 .collect(Collectors.toUnmodifiableMap(Expense::getCategory, Expense::getAmount, Money::add));
     }
 
