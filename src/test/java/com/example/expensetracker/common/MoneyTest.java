@@ -105,4 +105,14 @@ class MoneyTest {
 
         assertThat(sum).isEqualTo(Money.of("120.75", "UAH"));
     }
+
+    @Test
+    void addShouldThrowExceptionWhenCurrenciesDiffer() {
+        Money hryvnias = Money.of("100.00", "UAH");
+        Money dollars = Money.of("10.00", "USD");
+
+        assertThatThrownBy(() -> hryvnias.add(dollars))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("currencies must match: UAH and USD");
+    }
 }
