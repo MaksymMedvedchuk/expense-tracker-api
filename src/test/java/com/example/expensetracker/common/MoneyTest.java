@@ -115,4 +115,13 @@ class MoneyTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("currencies must match: UAH and USD");
     }
+
+    @Test
+    void divideShouldRoundToCurrencyScaleWhenResultHasInfiniteFraction() {
+        Money money = Money.of("100.00", "UAH");
+
+        Money result = money.divide(3);
+
+        assertThat(result).isEqualTo(Money.of("33.33", "UAH"));
+    }
 }

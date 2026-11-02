@@ -22,6 +22,10 @@ public record Money(BigDecimal amount, Currency currency) {
         return new Money(amount.add(other.amount), currency);
     }
 
+    public Money divide(long divisor) {
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+
     private void requireSameCurrency(Money other) {
         if (!currency.equals(other.currency)) {
             throw new IllegalArgumentException(
