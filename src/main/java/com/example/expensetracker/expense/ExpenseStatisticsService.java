@@ -30,7 +30,7 @@ public class ExpenseStatisticsService {
     }
 
     public Optional<Money> averagePerDay(LocalDate from, LocalDate to) {
-        throw new UnsupportedOperationException("not implemented yet");
+        return Optional.empty();
     }
 
     private Stream<Expense> expensesWithin(LocalDate from, LocalDate to) {
