@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class ExpenseStatisticsService {
 
@@ -25,7 +26,8 @@ public class ExpenseStatisticsService {
     }
 
     public Map<Category, Money> totalsByCategory(LocalDate from, LocalDate to) {
-        return Map.of();
+        return expenses.stream()
+                .collect(Collectors.toUnmodifiableMap(Expense::getCategory, Expense::getAmount, Money::add));
     }
 
     private static void requireValidPeriod(LocalDate from, LocalDate to) {
