@@ -29,6 +29,10 @@ public class ExpenseStatisticsService {
                 .collect(Collectors.toUnmodifiableMap(Expense::getCategory, Expense::getAmount, Money::add));
     }
 
+    public Optional<Money> averagePerDay(LocalDate from, LocalDate to) {
+        throw new UnsupportedOperationException("not implemented yet");
+    }
+
     private Stream<Expense> expensesWithin(LocalDate from, LocalDate to) {
         requireValidPeriod(from, to);
         return expenses.stream()

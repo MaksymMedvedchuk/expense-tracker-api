@@ -117,6 +117,15 @@ class ExpenseStatisticsServiceTest {
                 .hasMessage("from must not be after to: 2026-11-30 > 2026-11-01");
     }
 
+    @Test
+    void averagePerDayShouldReturnEmptyWhenThereAreNoExpenses() {
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
+
+        Optional<Money> average = service.averagePerDay(FROM, TO);
+
+        assertThat(average).isEmpty();
+    }
+
     private static Expense expenseOn(LocalDate date, String amount) {
         return new Expense(Money.of(amount, "UAH"), date, "Expense", new Category());
     }
