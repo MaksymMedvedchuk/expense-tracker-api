@@ -23,7 +23,9 @@ public record Money(BigDecimal amount, Currency currency) {
     }
 
     public Money divide(long divisor) {
-        throw new UnsupportedOperationException("not implemented yet");
+        BigDecimal quotient = amount.divide(
+                BigDecimal.valueOf(divisor), currency.getDefaultFractionDigits(), RoundingMode.HALF_EVEN);
+        return new Money(quotient, currency);
     }
 
     private void requireSameCurrency(Money other) {
