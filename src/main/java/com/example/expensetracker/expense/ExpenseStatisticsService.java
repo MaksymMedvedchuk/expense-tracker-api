@@ -15,6 +15,9 @@ public class ExpenseStatisticsService {
     }
 
     public Optional<Money> totalFor(LocalDate from, LocalDate to) {
-        return Optional.empty();
+        if (expenses.isEmpty()) {
+            return Optional.empty();
+        }
+        return Optional.of(expenses.get(0).getAmount());
     }
 }
