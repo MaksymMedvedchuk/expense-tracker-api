@@ -5,6 +5,12 @@
       "Bash(git push *)",
       "Bash(gh pr create *)",
       "Bash(gh pr edit *)"
+    ],
+    "deny": [
+      "Bash(git push * main)",
+      "Bash(git push * main *)",
+      "Bash(git push *:main)",
+      "Bash(git push *:main *)"
     ]
   }
 }
