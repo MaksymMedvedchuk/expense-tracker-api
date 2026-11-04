@@ -118,6 +118,17 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
+    void totalsByCategory_shouldThrowException_whenCategoriesHaveDifferentCurrencies() {
+        Expense food = new Expense(Money.of("100.00", "UAH"), FROM, "Lunch", categoryNamed("Food"));
+        Expense travel = new Expense(Money.of("10.00", "USD"), TO, "Ticket", categoryNamed("Travel"));
+        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(food, travel));
+
+        assertThatThrownBy(() -> service.totalsByCategory(FROM, TO))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("currencies must match: UAH and USD");
+    }
+
+    @Test
     void averagePerDay_shouldReturnEmpty_whenThereAreNoExpenses() {
         ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
 
