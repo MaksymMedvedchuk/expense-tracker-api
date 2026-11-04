@@ -23,6 +23,10 @@ Java 21, Spring Boot 3, Gradle (Kotlin DSL), PostgreSQL, Flyway, JUnit 5 + Asser
 
 ## Git-flow
 Гілки `feature/…`, `chore/…`, `fix/…`, `refactor/…`; conventional commits; PR ≤ 300 рядків; без пушів у main.
+- Коміт, пуш і PR робить Claude, кожен крок — лише після мого погодження:
+  1. Показує повідомлення коміту → я погоджую → `git commit`
+  2. Показує гілку і коміти для пушу → я погоджую → `git push`
+  3. Показує опис PR (скіл `pr-description`) → я погоджую → `gh pr create` / `gh pr edit`
 
 ## Спілкування
 - Відповідай українською; терміни і код — англійською
