@@ -2,7 +2,11 @@ package com.example.expensetracker.expense;
 
 import com.example.expensetracker.category.Category;
 import com.example.expensetracker.common.Money;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,15 +15,34 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class ExpenseStatisticsServiceTest {
 
     private static final LocalDate FROM = LocalDate.of(2026, 11, 1);
     private static final LocalDate TO = LocalDate.of(2026, 11, 30);
 
+    @Mock
+    private ExpenseRepository expenseRepository;
+
+    private ExpenseStatisticsService service;
+
+    @BeforeEach
+    void setUp() {
+        service = new ExpenseStatisticsService(expenseRepository);
+    }
+
+    @Test
+    void constructor_shouldThrowException_whenRepositoryIsNull() {
+        assertThatThrownBy(() -> new ExpenseStatisticsService(null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("expenseRepository must not be null");
+    }
+
     @Test
     void totalFor_shouldReturnEmpty_whenThereAreNoExpenses() {
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
+        givenExpensesBetween(FROM, TO);
 
         Optional<Money> total = service.totalFor(FROM, TO);
 
@@ -29,8 +52,7 @@ class ExpenseStatisticsServiceTest {
     @Test
     void totalFor_shouldReturnAmount_whenThereIsOneExpenseInPeriod() {
         Money amount = Money.of("150.00", "UAH");
-        Expense expense = new Expense(amount, LocalDate.of(2026, 11, 15), "Lunch", new Category());
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(expense));
+        givenExpensesBetween(FROM, TO, new Expense(amount, LocalDate.of(2026, 11, 15), "Lunch", new Category()));
 
         Optional<Money> total = service.totalFor(FROM, TO);
 
@@ -38,13 +60,11 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalFor_shouldSumOnlyExpensesWithinPeriodIncludingBoundaries() {
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
-                expenseOn(FROM.minusDays(1), "1000.00"),
+    void totalFor_shouldSumAllExpensesInPeriod() {
+        givenExpensesBetween(FROM, TO,
                 expenseOn(FROM, "100.00"),
                 expenseOn(LocalDate.of(2026, 11, 15), "20.00"),
-                expenseOn(TO, "3.00"),
-                expenseOn(TO.plusDays(1), "5000.00")));
+                expenseOn(TO, "3.00"));
 
         Optional<Money> total = service.totalFor(FROM, TO);
 
@@ -53,8 +73,6 @@ class ExpenseStatisticsServiceTest {
 
     @Test
     void totalFor_shouldThrowException_whenFromIsAfterTo() {
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
-
         assertThatThrownBy(() -> service.totalFor(TO, FROM))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("from must not be after to: 2026-11-30 > 2026-11-01");
@@ -62,9 +80,9 @@ class ExpenseStatisticsServiceTest {
 
     @Test
     void totalFor_shouldThrowException_whenExpensesHaveDifferentCurrencies() {
-        Expense inHryvnias = new Expense(Money.of("100.00", "UAH"), FROM, "Taxi", new Category());
-        Expense inDollars = new Expense(Money.of("10.00", "USD"), TO, "Book", new Category());
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(inHryvnias, inDollars));
+        givenExpensesBetween(FROM, TO,
+                new Expense(Money.of("100.00", "UAH"), FROM, "Taxi", new Category()),
+                new Expense(Money.of("10.00", "USD"), TO, "Book", new Category()));
 
         assertThatThrownBy(() -> service.totalFor(FROM, TO))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -73,7 +91,7 @@ class ExpenseStatisticsServiceTest {
 
     @Test
     void totalsByCategory_shouldReturnEmptyMap_whenThereAreNoExpenses() {
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
+        givenExpensesBetween(FROM, TO);
 
         Map<Category, Money> totals = service.totalsByCategory(FROM, TO);
 
@@ -82,10 +100,10 @@ class ExpenseStatisticsServiceTest {
 
     @Test
     void totalsByCategory_shouldSumExpensesPerCategory_whenCategoriesAreEqualByName() {
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
+        givenExpensesBetween(FROM, TO,
                 expenseIn("Food", "150.00"),
                 expenseIn("Transport", "200.00"),
-                expenseIn("Food", "300.00")));
+                expenseIn("Food", "300.00"));
 
         Map<Category, Money> totals = service.totalsByCategory(FROM, TO);
 
@@ -95,23 +113,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalsByCategory_shouldIgnoreExpensesOutsidePeriod() {
-        Category food = categoryNamed("Food");
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
-                new Expense(Money.of("1000.00", "UAH"), FROM.minusDays(1), "Before", food),
-                new Expense(Money.of("100.00", "UAH"), FROM, "First day", food),
-                new Expense(Money.of("20.00", "UAH"), TO, "Last day", food),
-                new Expense(Money.of("5000.00", "UAH"), TO.plusDays(1), "After", categoryNamed("Travel"))));
-
-        Map<Category, Money> totals = service.totalsByCategory(FROM, TO);
-
-        assertThat(totals).containsExactlyEntriesOf(Map.of(food, Money.of("120.00", "UAH")));
-    }
-
-    @Test
     void totalsByCategory_shouldThrowException_whenFromIsAfterTo() {
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
-
         assertThatThrownBy(() -> service.totalsByCategory(TO, FROM))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("from must not be after to: 2026-11-30 > 2026-11-01");
@@ -119,9 +121,9 @@ class ExpenseStatisticsServiceTest {
 
     @Test
     void totalsByCategory_shouldThrowException_whenCategoriesHaveDifferentCurrencies() {
-        Expense food = new Expense(Money.of("100.00", "UAH"), FROM, "Lunch", categoryNamed("Food"));
-        Expense travel = new Expense(Money.of("10.00", "USD"), TO, "Ticket", categoryNamed("Travel"));
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(food, travel));
+        givenExpensesBetween(FROM, TO,
+                new Expense(Money.of("100.00", "UAH"), FROM, "Lunch", categoryNamed("Food")),
+                new Expense(Money.of("10.00", "USD"), TO, "Ticket", categoryNamed("Travel")));
 
         assertThatThrownBy(() -> service.totalsByCategory(FROM, TO))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -130,7 +132,7 @@ class ExpenseStatisticsServiceTest {
 
     @Test
     void averagePerDay_shouldReturnEmpty_whenThereAreNoExpenses() {
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
+        givenExpensesBetween(FROM, TO);
 
         Optional<Money> average = service.averagePerDay(FROM, TO);
 
@@ -140,9 +142,9 @@ class ExpenseStatisticsServiceTest {
     @Test
     void averagePerDay_shouldDivideTotalByAllDaysInPeriodIncludingDaysWithoutExpenses() {
         LocalDate tenthDay = FROM.plusDays(9);
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of(
+        givenExpensesBetween(FROM, tenthDay,
                 expenseOn(FROM, "400.00"),
-                expenseOn(tenthDay, "600.00")));
+                expenseOn(tenthDay, "600.00"));
 
         Optional<Money> average = service.averagePerDay(FROM, tenthDay);
 
@@ -151,11 +153,13 @@ class ExpenseStatisticsServiceTest {
 
     @Test
     void averagePerDay_shouldThrowException_whenFromIsAfterTo() {
-        ExpenseStatisticsService service = new ExpenseStatisticsService(List.of());
-
         assertThatThrownBy(() -> service.averagePerDay(TO, FROM))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("from must not be after to: 2026-11-30 > 2026-11-01");
+    }
+
+    private void givenExpensesBetween(LocalDate from, LocalDate to, Expense... expenses) {
+        when(expenseRepository.findBetween(from, to)).thenReturn(List.of(expenses));
     }
 
     private static Expense expenseOn(LocalDate date, String amount) {
