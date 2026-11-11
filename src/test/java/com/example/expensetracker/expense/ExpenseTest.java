@@ -2,8 +2,12 @@ package com.example.expensetracker.expense;
 
 import com.example.expensetracker.category.Category;
 import com.example.expensetracker.category.CategoryType;
+import com.example.expensetracker.common.BusinessRuleViolationException;
 import com.example.expensetracker.common.Money;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.time.LocalDate;
 
@@ -40,6 +44,33 @@ class ExpenseTest {
                 .hasMessage("amount must not be null");
     }
 
+    @ParameterizedTest
+    @CsvSource({
+        "0, 0.00",
+        "0.00, 0.00",
+        "0.001, 0.00",
+        "0.005, 0.00",
+        "-0.01, -0.01",
+        "-100, -100.00"
+    })
+    void constructor_shouldThrowException_whenAmountIsNotPositive(String amount, String roundedAmount) {
+        Money notPositive = Money.of(amount, "UAH");
+
+        assertThatThrownBy(() -> new Expense(notPositive, DATE, "Coffee", FOOD))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessage("expense amount must be positive, but was: " + roundedAmount + " UAH");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0.01", "0.006", "1.00", "1000000.00"})
+    void constructor_shouldCreateExpense_whenAmountIsPositive(String amount) {
+        Money positive = Money.of(amount, "UAH");
+
+        Expense expense = new Expense(positive, DATE, "Coffee", FOOD);
+
+        assertThat(expense.getAmount()).isEqualTo(positive);
+    }
+
     @Test
     void constructor_shouldThrowException_whenDateIsNull() {
         assertThatThrownBy(() -> new Expense(AMOUNT, null, "Coffee", FOOD))
@@ -71,6 +102,18 @@ class ExpenseTest {
         assertThatThrownBy(() -> expense.changeAmount(null))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("amount must not be null");
+        assertThat(expense.getAmount()).isEqualTo(AMOUNT);
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"0", "0.004", "-0.01", "-100"})
+    void changeAmount_shouldKeepAmount_whenNewAmountIsNotPositive(String amount) {
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", FOOD);
+        Money notPositive = Money.of(amount, "UAH");
+
+        assertThatThrownBy(() -> expense.changeAmount(notPositive))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageStartingWith("expense amount must be positive");
         assertThat(expense.getAmount()).isEqualTo(AMOUNT);
     }
 
