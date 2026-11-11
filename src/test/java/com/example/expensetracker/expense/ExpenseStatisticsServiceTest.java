@@ -1,6 +1,7 @@
 package com.example.expensetracker.expense;
 
 import com.example.expensetracker.category.Category;
+import com.example.expensetracker.category.CategoryType;
 import com.example.expensetracker.common.Money;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,8 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class ExpenseStatisticsServiceTest {
+
+    private static final Category FOOD = new Category("Food", CategoryType.VARIABLE);
 
     private static final LocalDate FROM = LocalDate.of(2026, 11, 1);
     private static final LocalDate TO = LocalDate.of(2026, 11, 30);
@@ -52,7 +55,7 @@ class ExpenseStatisticsServiceTest {
     @Test
     void totalFor_shouldReturnAmount_whenThereIsOneExpenseInPeriod() {
         Money amount = Money.of("150.00", "UAH");
-        givenExpensesBetween(FROM, TO, new Expense(amount, LocalDate.of(2026, 11, 15), "Lunch", new Category()));
+        givenExpensesBetween(FROM, TO, new Expense(amount, LocalDate.of(2026, 11, 15), "Lunch", FOOD));
 
         Optional<Money> total = service.totalFor(FROM, TO);
 
@@ -81,8 +84,8 @@ class ExpenseStatisticsServiceTest {
     @Test
     void totalFor_shouldThrowException_whenExpensesHaveDifferentCurrencies() {
         givenExpensesBetween(FROM, TO,
-                new Expense(Money.of("100.00", "UAH"), FROM, "Taxi", new Category()),
-                new Expense(Money.of("10.00", "USD"), TO, "Book", new Category()));
+                new Expense(Money.of("100.00", "UAH"), FROM, "Taxi", FOOD),
+                new Expense(Money.of("10.00", "USD"), TO, "Book", FOOD));
 
         assertThatThrownBy(() -> service.totalFor(FROM, TO))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -163,7 +166,7 @@ class ExpenseStatisticsServiceTest {
     }
 
     private static Expense expenseOn(LocalDate date, String amount) {
-        return new Expense(Money.of(amount, "UAH"), date, "Expense", new Category());
+        return new Expense(Money.of(amount, "UAH"), date, "Expense", FOOD);
     }
 
     private static Expense expenseIn(String categoryName, String amount) {
@@ -171,8 +174,6 @@ class ExpenseStatisticsServiceTest {
     }
 
     private static Category categoryNamed(String name) {
-        Category category = new Category();
-        category.setName(name);
-        return category;
+        return new Category(name, CategoryType.VARIABLE);
     }
 }

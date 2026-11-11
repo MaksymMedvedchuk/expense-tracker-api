@@ -1,6 +1,7 @@
 package com.example.expensetracker.expense;
 
 import com.example.expensetracker.category.Category;
+import com.example.expensetracker.category.CategoryType;
 import com.example.expensetracker.common.Money;
 import org.junit.jupiter.api.Test;
 
@@ -10,6 +11,8 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 
 class InMemoryExpenseRepositoryTest {
+
+    private static final Category FOOD = new Category("Food", CategoryType.VARIABLE);
 
     private static final LocalDate FROM = LocalDate.of(2026, 11, 1);
     private static final LocalDate TO = LocalDate.of(2026, 11, 30);
@@ -39,6 +42,6 @@ class InMemoryExpenseRepositoryTest {
     }
 
     private static Expense expenseOn(LocalDate date) {
-        return new Expense(Money.of("100.00", "UAH"), date, "Expense", new Category());
+        return new Expense(Money.of("100.00", "UAH"), date, "Expense", FOOD);
     }
 }
