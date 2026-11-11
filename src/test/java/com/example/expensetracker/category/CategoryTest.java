@@ -4,7 +4,7 @@ import com.example.expensetracker.common.BusinessRuleViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
+import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -13,7 +13,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CategoryTest {
 
     @ParameterizedTest
-    @NullAndEmptySource
+    @EmptySource
     @ValueSource(strings = {" ", "   ", "\t", "\n"})
     void constructor_shouldThrowException_whenNameIsBlank(String name) {
         assertThatThrownBy(() -> new Category(name, CategoryType.VARIABLE))
@@ -34,6 +34,13 @@ class CategoryTest {
         Category category = new Category(name, CategoryType.VARIABLE);
 
         assertThat(category.getName()).isEqualTo(expected);
+    }
+
+    @Test
+    void constructor_shouldThrowException_whenNameIsNull() {
+        assertThatThrownBy(() -> new Category(null, CategoryType.VARIABLE))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("name must not be null");
     }
 
     @Test

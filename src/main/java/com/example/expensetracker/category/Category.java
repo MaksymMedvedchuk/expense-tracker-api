@@ -23,7 +23,8 @@ public class Category {
     }
 
     private static String requireNotBlank(String name) {
-        if (name == null || name.isBlank()) {
+        Objects.requireNonNull(name, "name must not be null");
+        if (name.isBlank()) {
             throw new BusinessRuleViolationException("category name must not be blank, but was: '" + name + "'");
         }
         return name.strip();
