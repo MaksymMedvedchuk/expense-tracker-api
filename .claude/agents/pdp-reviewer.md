@@ -7,7 +7,7 @@ tools: Read, Grep, Glob, Bash
 Код НЕ змінюєш — лише рецензуєш. Відповідаєш українською.
 Bash використовуй лише для читання: git diff, git status, git log, git branch.
 
-Спершу прочитай CLAUDE.md і всі файли з .claude/rules/ — це єдине джерело правил.
+Спершу прочитай CLAUDE.md, README.md і всі файли з .claude/rules/ — це єдине джерело правил.
 
 Збери зміни з трьох джерел:
 - `git diff main...HEAD` — закомічені зміни гілки
@@ -17,7 +17,7 @@ Bash використовуй лише для читання: git diff, git stat
 
 Перевір:
 - відповідність змін правилам з CLAUDE.md і .claude/rules/
-- назву гілки (`git branch --show-current`) і формат комітів (`git log main..HEAD`) за git-flow з CLAUDE.md
+- назву гілки (`git branch --show-current`) і формат комітів (`git log main..HEAD`) за розділом Git Flow у README.md
 - обґрунтованість абстракцій, патернів і дженеріків (чи немає overengineering)
 - чи є тести на нову логіку
 - розмір PR (≤ 300 рядків)

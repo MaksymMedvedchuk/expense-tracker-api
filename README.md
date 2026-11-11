@@ -8,6 +8,10 @@ REST API for tracking personal expenses.
 - `feature/...` — new functionality
 - `fix/...` — bug fixes
 - `refactor/...` — refactoring
+- `chore/...` — maintenance (build, CI, tooling)
+
+If the work comes from a task in `tasks.md`, put its number after the prefix:
+`feature/TASK-010-short-description`.
 
 Direct pushes to `main` forbidden
 

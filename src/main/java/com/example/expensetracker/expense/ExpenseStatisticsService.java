@@ -8,16 +8,17 @@ import java.time.temporal.ChronoUnit;
 import java.util.Currency;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class ExpenseStatisticsService {
 
-    private final List<Expense> expenses;
+    private final ExpenseRepository expenseRepository;
 
-    public ExpenseStatisticsService(List<Expense> expenses) {
-        this.expenses = List.copyOf(expenses);
+    public ExpenseStatisticsService(ExpenseRepository expenseRepository) {
+        this.expenseRepository = Objects.requireNonNull(expenseRepository, "expenseRepository must not be null");
     }
 
     public Optional<Money> totalFor(LocalDate from, LocalDate to) {
@@ -37,9 +38,7 @@ public class ExpenseStatisticsService {
 
     private Stream<Expense> expensesWithin(LocalDate from, LocalDate to) {
         requireValidPeriod(from, to);
-        List<Expense> within = expenses.stream()
-                .filter(expense -> isWithin(expense.getDate(), from, to))
-                .toList();
+        List<Expense> within = expenseRepository.findBetween(from, to);
         requireSingleCurrency(within);
         return within.stream();
     }
@@ -63,9 +62,5 @@ public class ExpenseStatisticsService {
 
     private static long daysInclusive(LocalDate from, LocalDate to) {
         return ChronoUnit.DAYS.between(from, to) + 1;
-    }
-
-    private static boolean isWithin(LocalDate date, LocalDate from, LocalDate to) {
-        return !date.isBefore(from) && !date.isAfter(to);
     }
 }
