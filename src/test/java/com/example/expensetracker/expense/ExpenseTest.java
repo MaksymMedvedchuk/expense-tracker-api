@@ -109,7 +109,7 @@ class ExpenseTest {
         "Europe/Kyiv, 2026-11-01",
         "Asia/Tokyo, 2026-11-01"
     })
-    void constructor_shouldDetermineTodayInClockZone(String zone, LocalDate today) {
+    void constructor_shouldPlaceDayBoundaryInClockZone(String zone, LocalDate today) {
         Clock lateEvening = Clock.fixed(Instant.parse("2026-10-31T22:30:00Z"), ZoneId.of(zone));
 
         Expense expense = new Expense(AMOUNT, today, "Coffee", FOOD, lateEvening);
