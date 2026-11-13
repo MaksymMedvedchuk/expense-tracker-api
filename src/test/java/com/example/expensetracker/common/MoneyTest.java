@@ -1,6 +1,8 @@
 package com.example.expensetracker.common;
 
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.util.Currency;
@@ -123,5 +125,22 @@ class MoneyTest {
         Money result = money.divide(3);
 
         assertThat(result).isEqualTo(Money.of("33.33", "UAH"));
+    }
+
+    @ParameterizedTest
+    @CsvSource({
+        "0.01, true",
+        "100.00, true",
+        "0.00, false",
+        "0.004, false",
+        "-0.01, false",
+        "-100.00, false"
+    })
+    void isPositive_shouldReturnWhetherAmountIsAboveZero(String amount, boolean expected) {
+        Money money = Money.of(amount, "UAH");
+
+        boolean positive = money.isPositive();
+
+        assertThat(positive).isEqualTo(expected);
     }
 }

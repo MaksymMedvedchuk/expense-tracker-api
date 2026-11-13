@@ -1,6 +1,7 @@
 package com.example.expensetracker.expense;
 
 import com.example.expensetracker.category.Category;
+import com.example.expensetracker.common.BusinessRuleViolationException;
 import com.example.expensetracker.common.Money;
 
 import java.time.LocalDate;
@@ -14,7 +15,7 @@ public class Expense {
     private Category category;
 
     public Expense(Money amount, LocalDate date, String description, Category category) {
-        this.amount = Objects.requireNonNull(amount, "amount must not be null");
+        this.amount = requirePositive(amount);
         this.date = Objects.requireNonNull(date, "date must not be null");
         this.category = Objects.requireNonNull(category, "category must not be null");
         this.description = description;
@@ -37,7 +38,7 @@ public class Expense {
     }
 
     public void changeAmount(Money newAmount) {
-        this.amount = Objects.requireNonNull(newAmount, "amount must not be null");
+        this.amount = requirePositive(newAmount);
     }
 
     public void reschedule(LocalDate newDate) {
@@ -50,5 +51,14 @@ public class Expense {
 
     public void moveTo(Category newCategory) {
         this.category = Objects.requireNonNull(newCategory, "category must not be null");
+    }
+
+    private static Money requirePositive(Money amount) {
+        Objects.requireNonNull(amount, "amount must not be null");
+        if (!amount.isPositive()) {
+            throw new BusinessRuleViolationException(
+                    "expense amount must be positive, but was: " + amount.amount() + " " + amount.currency());
+        }
+        return amount;
     }
 }
