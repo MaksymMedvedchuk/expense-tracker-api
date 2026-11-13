@@ -1,6 +1,7 @@
 plugins {
     java
     checkstyle
+    jacoco
     id("org.springframework.boot") version "3.5.12"
     id("io.spring.dependency-management") version "1.1.7"
 }
@@ -24,6 +25,10 @@ checkstyle {
     isIgnoreFailures = false
 }
 
+jacoco {
+    toolVersion = "0.8.13"
+}
+
 repositories {
     mavenCentral()
 }
@@ -38,4 +43,52 @@ dependencies {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// Coverage counts only domain and service code; web, DTO and config layers are excluded.
+val coverageExclusions = listOf(
+    "**/ExpenseTrackerApplication*",
+    "**/*Controller*",
+    "**/*Request*",
+    "**/*Response*",
+    "**/dto/**",
+    "**/*Config*",
+    "**/config/**",
+)
+
+val coveredClasses = sourceSets.main.get().output.asFileTree.matching {
+    exclude(coverageExclusions)
+}
+
+tasks.test {
+    finalizedBy(tasks.jacocoTestReport)
+}
+
+tasks.jacocoTestReport {
+    dependsOn(tasks.test)
+    classDirectories.setFrom(coveredClasses)
+    reports {
+        html.required = true
+        xml.required = false
+        csv.required = false
+    }
+}
+
+tasks.jacocoTestCoverageVerification {
+    dependsOn(tasks.test)
+    classDirectories.setFrom(coveredClasses)
+    violationRules {
+        rule {
+            element = "BUNDLE"
+            limit {
+                counter = "INSTRUCTION"
+                value = "COVEREDRATIO"
+                minimum = "0.70".toBigDecimal()
+            }
+        }
+    }
+}
+
+tasks.check {
+    dependsOn(tasks.jacocoTestCoverageVerification)
 }
