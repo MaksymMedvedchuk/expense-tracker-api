@@ -9,7 +9,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneOffset;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -22,6 +25,7 @@ import static org.mockito.Mockito.when;
 class ExpenseStatisticsServiceTest {
 
     private static final Category FOOD = new Category("Food", CategoryType.VARIABLE);
+    private static final Clock CLOCK = Clock.fixed(Instant.parse("2027-01-01T00:00:00Z"), ZoneOffset.UTC);
 
     private static final LocalDate FROM = LocalDate.of(2026, 11, 1);
     private static final LocalDate TO = LocalDate.of(2026, 11, 30);
@@ -55,7 +59,7 @@ class ExpenseStatisticsServiceTest {
     @Test
     void totalFor_shouldReturnAmount_whenThereIsOneExpenseInPeriod() {
         Money amount = Money.of("150.00", "UAH");
-        givenExpensesBetween(FROM, TO, new Expense(amount, LocalDate.of(2026, 11, 15), "Lunch", FOOD));
+        givenExpensesBetween(FROM, TO, new Expense(amount, LocalDate.of(2026, 11, 15), "Lunch", FOOD, CLOCK));
 
         Optional<Money> total = service.totalFor(FROM, TO);
 
@@ -84,8 +88,8 @@ class ExpenseStatisticsServiceTest {
     @Test
     void totalFor_shouldThrowException_whenExpensesHaveDifferentCurrencies() {
         givenExpensesBetween(FROM, TO,
-                new Expense(Money.of("100.00", "UAH"), FROM, "Taxi", FOOD),
-                new Expense(Money.of("10.00", "USD"), TO, "Book", FOOD));
+                new Expense(Money.of("100.00", "UAH"), FROM, "Taxi", FOOD, CLOCK),
+                new Expense(Money.of("10.00", "USD"), TO, "Book", FOOD, CLOCK));
 
         assertThatThrownBy(() -> service.totalFor(FROM, TO))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -125,8 +129,8 @@ class ExpenseStatisticsServiceTest {
     @Test
     void totalsByCategory_shouldThrowException_whenCategoriesHaveDifferentCurrencies() {
         givenExpensesBetween(FROM, TO,
-                new Expense(Money.of("100.00", "UAH"), FROM, "Lunch", categoryNamed("Food")),
-                new Expense(Money.of("10.00", "USD"), TO, "Ticket", categoryNamed("Travel")));
+                new Expense(Money.of("100.00", "UAH"), FROM, "Lunch", categoryNamed("Food"), CLOCK),
+                new Expense(Money.of("10.00", "USD"), TO, "Ticket", categoryNamed("Travel"), CLOCK));
 
         assertThatThrownBy(() -> service.totalsByCategory(FROM, TO))
                 .isInstanceOf(IllegalArgumentException.class)
@@ -166,11 +170,11 @@ class ExpenseStatisticsServiceTest {
     }
 
     private static Expense expenseOn(LocalDate date, String amount) {
-        return new Expense(Money.of(amount, "UAH"), date, "Expense", FOOD);
+        return new Expense(Money.of(amount, "UAH"), date, "Expense", FOOD, CLOCK);
     }
 
     private static Expense expenseIn(String categoryName, String amount) {
-        return new Expense(Money.of(amount, "UAH"), FROM, "Expense", categoryNamed(categoryName));
+        return new Expense(Money.of(amount, "UAH"), FROM, "Expense", categoryNamed(categoryName), CLOCK);
     }
 
     private static Category categoryNamed(String name) {

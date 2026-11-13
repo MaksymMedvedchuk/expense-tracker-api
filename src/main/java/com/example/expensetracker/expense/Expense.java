@@ -4,6 +4,7 @@ import com.example.expensetracker.category.Category;
 import com.example.expensetracker.common.BusinessRuleViolationException;
 import com.example.expensetracker.common.Money;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Objects;
 
@@ -14,9 +15,9 @@ public class Expense {
     private String description;
     private Category category;
 
-    public Expense(Money amount, LocalDate date, String description, Category category) {
+    public Expense(Money amount, LocalDate date, String description, Category category, Clock clock) {
         this.amount = requirePositive(amount);
-        this.date = Objects.requireNonNull(date, "date must not be null");
+        this.date = requireNotInFuture(date, clock);
         this.category = Objects.requireNonNull(category, "category must not be null");
         this.description = description;
     }
@@ -41,8 +42,8 @@ public class Expense {
         this.amount = requirePositive(newAmount);
     }
 
-    public void reschedule(LocalDate newDate) {
-        this.date = Objects.requireNonNull(newDate, "date must not be null");
+    public void reschedule(LocalDate newDate, Clock clock) {
+        this.date = requireNotInFuture(newDate, clock);
     }
 
     public void changeDescription(String newDescription) {
@@ -60,5 +61,16 @@ public class Expense {
                     "expense amount must be positive, but was: " + amount.amount() + " " + amount.currency());
         }
         return amount;
+    }
+
+    private static LocalDate requireNotInFuture(LocalDate date, Clock clock) {
+        Objects.requireNonNull(date, "date must not be null");
+        Objects.requireNonNull(clock, "clock must not be null");
+        LocalDate today = LocalDate.now(clock);
+        if (date.isAfter(today)) {
+            throw new BusinessRuleViolationException(
+                    "expense date must not be in the future, but was: " + date + " (today: " + today + ")");
+        }
+        return date;
     }
 }
