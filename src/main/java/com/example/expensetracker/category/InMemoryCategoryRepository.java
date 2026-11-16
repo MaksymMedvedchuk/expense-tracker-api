@@ -24,6 +24,12 @@ public class InMemoryCategoryRepository implements CategoryRepository {
     }
 
     @Override
+    public boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id) {
+        return categories.values().stream()
+                .anyMatch(category -> !category.getId().equals(id) && category.getName().equalsIgnoreCase(name));
+    }
+
+    @Override
     public Category save(Category category) {
         categories.put(category.getId(), category);
         return category;
@@ -39,5 +45,10 @@ public class InMemoryCategoryRepository implements CategoryRepository {
         return categories.values().stream()
                 .sorted(Comparator.comparing(Category::getName))
                 .toList();
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        categories.remove(id);
     }
 }

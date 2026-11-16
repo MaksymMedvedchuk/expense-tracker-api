@@ -73,4 +73,34 @@ class CategoryTest {
         assertThat(category).isEqualTo(category);
         assertThat(category.hashCode()).isEqualTo(category.getId().hashCode());
     }
+
+    @Test
+    void update_shouldReplaceNameAndType() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+
+        category.update(" Rent ", CategoryType.FIXED);
+
+        assertThat(category.getName()).isEqualTo("Rent");
+        assertThat(category.getType()).isEqualTo(CategoryType.FIXED);
+    }
+
+    @Test
+    void update_shouldKeepCategoryUnchanged_whenNameIsBlank() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+
+        assertThatThrownBy(() -> category.update(" ", CategoryType.FIXED))
+                .isInstanceOf(BusinessRuleViolationException.class);
+        assertThat(category.getName()).isEqualTo("Food");
+        assertThat(category.getType()).isEqualTo(CategoryType.VARIABLE);
+    }
+
+    @Test
+    void update_shouldKeepCategoryUnchanged_whenTypeIsNull() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+
+        assertThatThrownBy(() -> category.update("Rent", null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("type must not be null");
+        assertThat(category.getName()).isEqualTo("Food");
+    }
 }

@@ -17,9 +17,13 @@ import org.springframework.test.web.servlet.MockMvc;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -109,5 +113,55 @@ class CategoryControllerTest {
     void findById_shouldReturn400_whenIdIsNotUuid() throws Exception {
         mockMvc.perform(get("/api/v1/categories/{id}", "not-a-uuid"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void update_shouldReturnUpdatedCategory() throws Exception {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+        when(categoryService.update(category.getId(), "Food", CategoryType.VARIABLE)).thenReturn(category);
+
+        mockMvc.perform(put("/api/v1/categories/{id}", category.getId())
+                        .contentType(MediaType.APPLICATION_JSON).content(FOOD_JSON))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(category.getId().toString()))
+                .andExpect(jsonPath("$.name").value("Food"));
+    }
+
+    @Test
+    void update_shouldReturn404_whenCategoryDoesNotExist() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(categoryService.update(id, "Food", CategoryType.VARIABLE)).thenThrow(new CategoryNotFoundException(id));
+
+        mockMvc.perform(put("/api/v1/categories/{id}", id).contentType(MediaType.APPLICATION_JSON).content(FOOD_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void update_shouldReturn409_whenNameBelongsToAnotherCategory() throws Exception {
+        UUID id = UUID.randomUUID();
+        when(categoryService.update(id, "Food", CategoryType.VARIABLE))
+                .thenThrow(new DuplicateCategoryNameException("Food"));
+
+        mockMvc.perform(put("/api/v1/categories/{id}", id).contentType(MediaType.APPLICATION_JSON).content(FOOD_JSON))
+                .andExpect(status().isConflict());
+    }
+
+    @Test
+    void delete_shouldReturn204_whenCategoryIsDeleted() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/categories/{id}", id))
+                .andExpect(status().isNoContent());
+
+        verify(categoryService).delete(id);
+    }
+
+    @Test
+    void delete_shouldReturn404_whenCategoryDoesNotExist() throws Exception {
+        UUID id = UUID.randomUUID();
+        doThrow(new CategoryNotFoundException(id)).when(categoryService).delete(id);
+
+        mockMvc.perform(delete("/api/v1/categories/{id}", id))
+                .andExpect(status().isNotFound());
     }
 }

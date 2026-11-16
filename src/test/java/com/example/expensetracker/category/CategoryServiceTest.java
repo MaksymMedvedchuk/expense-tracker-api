@@ -101,4 +101,59 @@ class CategoryServiceTest {
 
         assertThat(service.findAll()).isEqualTo(categories);
     }
+
+    @Test
+    void update_shouldSaveCategoryWithNewNameAndType() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        when(categoryRepository.existsByNameIgnoreCaseAndIdNot("Rent", category.getId())).thenReturn(false);
+        when(categoryRepository.save(category)).thenReturn(category);
+
+        Category updated = service.update(category.getId(), " Rent ", CategoryType.FIXED);
+
+        assertThat(updated.getName()).isEqualTo("Rent");
+        assertThat(updated.getType()).isEqualTo(CategoryType.FIXED);
+    }
+
+    @Test
+    void update_shouldThrowExceptionAndKeepCategoryUnchanged_whenNameBelongsToAnotherCategory() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        when(categoryRepository.existsByNameIgnoreCaseAndIdNot("Rent", category.getId())).thenReturn(true);
+
+        assertThatThrownBy(() -> service.update(category.getId(), "Rent", CategoryType.FIXED))
+                .isInstanceOf(DuplicateCategoryNameException.class);
+        assertThat(category.getName()).isEqualTo("Food");
+        verify(categoryRepository, never()).save(any());
+    }
+
+    @Test
+    void update_shouldThrowException_whenCategoryDoesNotExist() {
+        UUID id = UUID.randomUUID();
+        when(categoryRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.update(id, "Rent", CategoryType.FIXED))
+                .isInstanceOf(CategoryNotFoundException.class);
+        verify(categoryRepository, never()).save(any());
+    }
+
+    @Test
+    void delete_shouldDeleteCategory_whenItExists() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+
+        service.delete(category.getId());
+
+        verify(categoryRepository).deleteById(category.getId());
+    }
+
+    @Test
+    void delete_shouldThrowException_whenCategoryDoesNotExist() {
+        UUID id = UUID.randomUUID();
+        when(categoryRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.delete(id))
+                .isInstanceOf(CategoryNotFoundException.class);
+        verify(categoryRepository, never()).deleteById(any());
+    }
 }

@@ -11,6 +11,12 @@ public interface CategoryRepository {
      */
     boolean existsByNameIgnoreCase(String name);
 
+    /**
+     * Same as {@link #existsByNameIgnoreCase(String)}, but ignores the category with the given id,
+     * so a category does not conflict with itself on update.
+     */
+    boolean existsByNameIgnoreCaseAndIdNot(String name, UUID id);
+
     Category save(Category category);
 
     Optional<Category> findById(UUID id);
@@ -19,4 +25,6 @@ public interface CategoryRepository {
      * Returns categories sorted by name.
      */
     List<Category> findAll();
+
+    void deleteById(UUID id);
 }

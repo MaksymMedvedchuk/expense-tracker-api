@@ -37,4 +37,22 @@ class InMemoryCategoryRepositoryTest {
 
         assertThat(repository.findAll()).containsExactly(food, rent);
     }
+
+    @Test
+    void existsByNameIgnoreCaseAndIdNot_shouldIgnoreCategoryWithGivenId() {
+        Category food = repository.save(new Category("Food", CategoryType.VARIABLE));
+        Category rent = repository.save(new Category("Rent", CategoryType.FIXED));
+
+        assertThat(repository.existsByNameIgnoreCaseAndIdNot("FOOD", food.getId())).isFalse();
+        assertThat(repository.existsByNameIgnoreCaseAndIdNot("FOOD", rent.getId())).isTrue();
+    }
+
+    @Test
+    void deleteById_shouldRemoveCategory() {
+        Category food = repository.save(new Category("Food", CategoryType.VARIABLE));
+
+        repository.deleteById(food.getId());
+
+        assertThat(repository.findById(food.getId())).isEmpty();
+    }
 }
