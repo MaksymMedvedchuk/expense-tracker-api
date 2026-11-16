@@ -51,11 +51,26 @@ class CategoryTest {
     }
 
     @Test
-    void equals_shouldReturnTrue_whenNamesAreEqual() {
+    void constructor_shouldGenerateUniqueId() {
         Category first = new Category("Food", CategoryType.VARIABLE);
-        Category second = new Category("Food", CategoryType.FIXED);
+        Category second = new Category("Food", CategoryType.VARIABLE);
 
-        assertThat(first).isEqualTo(second);
-        assertThat(first.hashCode()).isEqualTo(second.hashCode());
+        assertThat(first.getId()).isNotNull().isNotEqualTo(second.getId());
+    }
+
+    @Test
+    void equals_shouldReturnFalse_whenIdsDifferEvenIfNamesAreEqual() {
+        Category first = new Category("Food", CategoryType.VARIABLE);
+        Category second = new Category("Food", CategoryType.VARIABLE);
+
+        assertThat(first).isNotEqualTo(second);
+    }
+
+    @Test
+    void equals_shouldReturnTrue_whenSameInstance() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+
+        assertThat(category).isEqualTo(category);
+        assertThat(category.hashCode()).isEqualTo(category.getId().hashCode());
     }
 }

@@ -106,17 +106,19 @@ class ExpenseStatisticsServiceTest {
     }
 
     @Test
-    void totalsByCategory_shouldSumExpensesPerCategory_whenCategoriesAreEqualByName() {
+    void totalsByCategory_shouldSumExpensesPerCategory_whenExpensesShareCategory() {
+        Category food = categoryNamed("Food");
+        Category transport = categoryNamed("Transport");
         givenExpensesBetween(FROM, TO,
-                expenseIn("Food", "150.00"),
-                expenseIn("Transport", "200.00"),
-                expenseIn("Food", "300.00"));
+                expenseIn(food, "150.00"),
+                expenseIn(transport, "200.00"),
+                expenseIn(food, "300.00"));
 
         Map<Category, Money> totals = service.totalsByCategory(FROM, TO);
 
         assertThat(totals).containsExactlyInAnyOrderEntriesOf(Map.of(
-                categoryNamed("Food"), Money.of("450.00", "UAH"),
-                categoryNamed("Transport"), Money.of("200.00", "UAH")));
+                food, Money.of("450.00", "UAH"),
+                transport, Money.of("200.00", "UAH")));
     }
 
     @Test
@@ -173,8 +175,8 @@ class ExpenseStatisticsServiceTest {
         return new Expense(Money.of(amount, "UAH"), date, "Expense", FOOD, CLOCK);
     }
 
-    private static Expense expenseIn(String categoryName, String amount) {
-        return new Expense(Money.of(amount, "UAH"), FROM, "Expense", categoryNamed(categoryName), CLOCK);
+    private static Expense expenseIn(Category category, String amount) {
+        return new Expense(Money.of(amount, "UAH"), FROM, "Expense", category, CLOCK);
     }
 
     private static Category categoryNamed(String name) {
