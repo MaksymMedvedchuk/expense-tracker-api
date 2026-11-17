@@ -121,13 +121,18 @@ class CategoryControllerTest {
     @Test
     void update_shouldReturnUpdatedCategory() throws Exception {
         Category category = new Category("Food", CategoryType.VARIABLE);
-        when(categoryService.update(category.getId(), "Food", CategoryType.VARIABLE)).thenReturn(category);
+        category.update("Rent", CategoryType.FIXED);
+        when(categoryService.update(category.getId(), "Rent", CategoryType.FIXED)).thenReturn(category);
 
         mockMvc.perform(put("/api/v1/categories/{id}", category.getId())
-                        .contentType(MediaType.APPLICATION_JSON).content(FOOD_JSON))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name": "Rent", "type": "FIXED"}
+                                """))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(category.getId().toString()))
-                .andExpect(jsonPath("$.name").value("Food"));
+                .andExpect(jsonPath("$.name").value("Rent"))
+                .andExpect(jsonPath("$.type").value("FIXED"));
     }
 
     @Test
