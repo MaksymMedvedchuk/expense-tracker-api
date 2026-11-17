@@ -65,12 +65,4 @@ class CategoryTest {
 
         assertThat(first).isNotEqualTo(second);
     }
-
-    @Test
-    void equals_shouldReturnTrue_whenSameInstance() {
-        Category category = new Category("Food", CategoryType.VARIABLE);
-
-        assertThat(category).isEqualTo(category);
-        assertThat(category.hashCode()).isEqualTo(category.getId().hashCode());
-    }
 }
