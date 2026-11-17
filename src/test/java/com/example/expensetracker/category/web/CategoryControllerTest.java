@@ -66,11 +66,14 @@ class CategoryControllerTest {
     }
 
     @Test
-    void create_shouldReturn400_whenBusinessRuleIsViolated() throws Exception {
-        when(categoryService.create("Food", CategoryType.VARIABLE))
+    void create_shouldReturn400_whenNameIsBlank() throws Exception {
+        when(categoryService.create("  ", CategoryType.VARIABLE))
                 .thenThrow(new BusinessRuleViolationException("category name must not be blank"));
 
-        mockMvc.perform(post("/api/v1/categories").contentType(MediaType.APPLICATION_JSON).content(FOOD_JSON))
+        mockMvc.perform(post("/api/v1/categories").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"name": "  ", "type": "VARIABLE"}
+                                """))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.detail").value("category name must not be blank"));
     }

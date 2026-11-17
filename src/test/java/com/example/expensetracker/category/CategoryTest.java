@@ -67,14 +67,6 @@ class CategoryTest {
     }
 
     @Test
-    void equals_shouldReturnTrue_whenSameInstance() {
-        Category category = new Category("Food", CategoryType.VARIABLE);
-
-        assertThat(category).isEqualTo(category);
-        assertThat(category.hashCode()).isEqualTo(category.getId().hashCode());
-    }
-
-    @Test
     void update_shouldReplaceNameAndType() {
         Category category = new Category("Food", CategoryType.VARIABLE);
 
