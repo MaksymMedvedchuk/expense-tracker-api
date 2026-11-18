@@ -270,4 +270,40 @@ class ExpenseTest {
 
         assertThat(expenses.contains(expense)).isTrue();
     }
+
+    @Test
+    void update_shouldReplaceAllEditableFields() {
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", FOOD, CLOCK);
+        Category rent = new Category("Rent", CategoryType.FIXED);
+        Money newAmount = Money.of("5000.00", "UAH");
+
+        expense.update(newAmount, TODAY, "Flat", rent, CLOCK);
+
+        assertThat(expense.getAmount()).isEqualTo(newAmount);
+        assertThat(expense.getDate()).isEqualTo(TODAY);
+        assertThat(expense.getDescription()).isEqualTo("Flat");
+        assertThat(expense.getCategory()).isSameAs(rent);
+    }
+
+    @Test
+    void update_shouldKeepExpenseUnchanged_whenDateIsInFuture() {
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", FOOD, CLOCK);
+        Money newAmount = Money.of("5000.00", "UAH");
+
+        assertThatThrownBy(() -> expense.update(newAmount, TODAY.plusDays(1), "Flat", FOOD, CLOCK))
+                .isInstanceOf(BusinessRuleViolationException.class);
+        assertThat(expense.getAmount()).isEqualTo(AMOUNT);
+        assertThat(expense.getDescription()).isEqualTo("Coffee");
+    }
+
+    @Test
+    void update_shouldKeepExpenseUnchanged_whenCategoryIsNull() {
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", FOOD, CLOCK);
+
+        assertThatThrownBy(() -> expense.update(AMOUNT, TODAY, "Flat", null, CLOCK))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("category must not be null");
+        assertThat(expense.getDate()).isEqualTo(DATE);
+        assertThat(expense.getDescription()).isEqualTo("Coffee");
+    }
 }

@@ -61,6 +61,20 @@ public class Expense {
         this.category = Objects.requireNonNull(newCategory, "category must not be null");
     }
 
+    /**
+     * Replaces all editable fields together; every value is validated before any field changes,
+     * so a failed update leaves the expense untouched.
+     */
+    public void update(Money newAmount, LocalDate newDate, String newDescription, Category newCategory, Clock clock) {
+        Money validAmount = requirePositive(newAmount);
+        LocalDate validDate = requireNotInFuture(newDate, clock);
+        Category validCategory = Objects.requireNonNull(newCategory, "category must not be null");
+        this.amount = validAmount;
+        this.date = validDate;
+        this.description = newDescription;
+        this.category = validCategory;
+    }
+
     private static Money requirePositive(Money amount) {
         Objects.requireNonNull(amount, "amount must not be null");
         if (!amount.isPositive()) {
