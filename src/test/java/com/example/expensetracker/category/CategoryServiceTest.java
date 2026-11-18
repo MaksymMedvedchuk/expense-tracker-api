@@ -9,6 +9,10 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
@@ -70,5 +74,31 @@ class CategoryServiceTest {
         assertThatThrownBy(() -> service.create("  ", CategoryType.VARIABLE))
                 .isInstanceOf(BusinessRuleViolationException.class);
         verify(categoryRepository, never()).save(any());
+    }
+
+    @Test
+    void findById_shouldReturnCategory_whenItExists() {
+        Category food = new Category("Food", CategoryType.VARIABLE);
+        when(categoryRepository.findById(food.getId())).thenReturn(Optional.of(food));
+
+        assertThat(service.findById(food.getId())).isSameAs(food);
+    }
+
+    @Test
+    void findById_shouldThrowException_whenCategoryDoesNotExist() {
+        UUID id = UUID.randomUUID();
+        when(categoryRepository.findById(id)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.findById(id))
+                .isInstanceOf(CategoryNotFoundException.class)
+                .hasMessage("category with id '" + id + "' not found");
+    }
+
+    @Test
+    void findAll_shouldReturnCategoriesFromRepository() {
+        List<Category> categories = List.of(new Category("Food", CategoryType.VARIABLE));
+        when(categoryRepository.findAll()).thenReturn(categories);
+
+        assertThat(service.findAll()).isEqualTo(categories);
     }
 }

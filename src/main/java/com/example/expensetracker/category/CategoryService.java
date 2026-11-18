@@ -1,6 +1,8 @@
 package com.example.expensetracker.category;
 
+import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 public class CategoryService {
 
@@ -16,5 +18,14 @@ public class CategoryService {
             throw new DuplicateCategoryNameException(category.getName());
         }
         return categoryRepository.save(category);
+    }
+
+    public Category findById(UUID id) {
+        return categoryRepository.findById(id)
+                .orElseThrow(() -> new CategoryNotFoundException(id));
+    }
+
+    public List<Category> findAll() {
+        return categoryRepository.findAll();
     }
 }
