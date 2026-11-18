@@ -28,4 +28,19 @@ public class CategoryService {
     public List<Category> findAll() {
         return categoryRepository.findAll();
     }
+
+    public Category update(UUID id, String name, CategoryType type) {
+        Category category = findById(id);
+        String normalizedName = Category.normalizeName(name);
+        if (categoryRepository.existsByNameIgnoreCaseAndIdNot(normalizedName, id)) {
+            throw new DuplicateCategoryNameException(normalizedName);
+        }
+        category.update(normalizedName, type);
+        return categoryRepository.save(category);
+    }
+
+    public void delete(UUID id) {
+        findById(id);
+        categoryRepository.deleteById(id);
+    }
 }

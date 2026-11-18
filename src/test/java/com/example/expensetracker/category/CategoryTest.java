@@ -7,6 +7,9 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -64,5 +67,45 @@ class CategoryTest {
         Category second = new Category("Food", CategoryType.VARIABLE);
 
         assertThat(first).isNotEqualTo(second);
+    }
+
+    @Test
+    void hashCode_shouldStayStable_whenCategoryIsUpdated() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+        Set<Category> categories = new HashSet<>(Set.of(category));
+
+        category.update("Groceries", CategoryType.FIXED);
+
+        assertThat(categories.contains(category)).isTrue();
+    }
+
+    @Test
+    void update_shouldReplaceNameAndType() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+
+        category.update(" Rent ", CategoryType.FIXED);
+
+        assertThat(category.getName()).isEqualTo("Rent");
+        assertThat(category.getType()).isEqualTo(CategoryType.FIXED);
+    }
+
+    @Test
+    void update_shouldKeepCategoryUnchanged_whenNameIsBlank() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+
+        assertThatThrownBy(() -> category.update(" ", CategoryType.FIXED))
+                .isInstanceOf(BusinessRuleViolationException.class);
+        assertThat(category.getName()).isEqualTo("Food");
+        assertThat(category.getType()).isEqualTo(CategoryType.VARIABLE);
+    }
+
+    @Test
+    void update_shouldKeepCategoryUnchanged_whenTypeIsNull() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+
+        assertThatThrownBy(() -> category.update("Rent", null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("type must not be null");
+        assertThat(category.getName()).isEqualTo("Food");
     }
 }
