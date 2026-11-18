@@ -7,19 +7,26 @@ import com.example.expensetracker.common.Money;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.util.Objects;
+import java.util.UUID;
 
 public class Expense {
 
+    private final UUID id;
     private Money amount;
     private LocalDate date;
     private String description;
     private Category category;
 
     public Expense(Money amount, LocalDate date, String description, Category category, Clock clock) {
+        this.id = UUID.randomUUID();
         this.amount = requirePositive(amount);
         this.date = requireNotInFuture(date, clock);
         this.category = Objects.requireNonNull(category, "category must not be null");
         this.description = description;
+    }
+
+    public UUID getId() {
+        return id;
     }
 
     public Money getAmount() {
@@ -72,5 +79,21 @@ public class Expense {
                     "expense date must not be in the future, but was: " + date + " (today: " + today + ")");
         }
         return date;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
+        if (!(object instanceof Expense other)) {
+            return false;
+        }
+        return id.equals(other.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
     }
 }

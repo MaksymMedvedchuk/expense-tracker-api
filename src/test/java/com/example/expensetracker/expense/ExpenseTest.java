@@ -15,6 +15,8 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -240,5 +242,32 @@ class ExpenseTest {
 
     private static Stream<LocalDate> pastOrPresentDates() {
         return Stream.of(TODAY, TODAY.minusDays(1), TODAY.minusYears(1), LocalDate.of(2000, 1, 1));
+    }
+
+    @Test
+    void constructor_shouldGenerateUniqueId() {
+        Expense first = new Expense(AMOUNT, DATE, "Coffee", FOOD, CLOCK);
+        Expense second = new Expense(AMOUNT, DATE, "Coffee", FOOD, CLOCK);
+
+        assertThat(first.getId()).isNotNull().isNotEqualTo(second.getId());
+    }
+
+    @Test
+    void equals_shouldReturnFalse_whenIdsDifferEvenIfFieldsAreEqual() {
+        Expense first = new Expense(AMOUNT, DATE, "Coffee", FOOD, CLOCK);
+        Expense second = new Expense(AMOUNT, DATE, "Coffee", FOOD, CLOCK);
+
+        assertThat(first).isNotEqualTo(second);
+    }
+
+    @Test
+    void hashCode_shouldStayStable_whenExpenseIsChanged() {
+        Expense expense = new Expense(AMOUNT, DATE, "Coffee", FOOD, CLOCK);
+        Set<Expense> expenses = new HashSet<>(Set.of(expense));
+
+        expense.changeAmount(Money.of("99.00", "UAH"));
+        expense.changeDescription("Lunch");
+
+        assertThat(expenses.contains(expense)).isTrue();
     }
 }
