@@ -37,4 +37,16 @@ public class ExpenseService {
     public Page<Expense> findAll(ExpenseFilter filter, PageRequest pageRequest) {
         return expenseRepository.findAll(filter, pageRequest);
     }
+
+    public Expense update(UUID id, Money amount, LocalDate date, String description, UUID categoryId) {
+        Expense expense = findById(id);
+        Category category = categoryService.findById(categoryId);
+        expense.update(amount, date, description, category, clock);
+        return expenseRepository.save(expense);
+    }
+
+    public void delete(UUID id) {
+        findById(id);
+        expenseRepository.deleteById(id);
+    }
 }

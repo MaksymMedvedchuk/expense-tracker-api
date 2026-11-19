@@ -117,4 +117,65 @@ class ExpenseServiceTest {
 
         assertThat(service.findAll(filter, pageRequest)).isSameAs(page);
     }
+
+    @Test
+    void update_shouldReplaceFieldsAndMoveExpenseToCategoryFoundById() {
+        Expense expense = new Expense(AMOUNT, TODAY, "Lunch", FOOD, CLOCK);
+        Category rent = new Category("Rent", CategoryType.FIXED);
+        Money newAmount = Money.of("5000.00", "UAH");
+        when(expenseRepository.findById(expense.getId())).thenReturn(Optional.of(expense));
+        when(categoryService.findById(rent.getId())).thenReturn(rent);
+        when(expenseRepository.save(expense)).thenReturn(expense);
+
+        Expense updated = service.update(expense.getId(), newAmount, TODAY.minusDays(1), "Flat", rent.getId());
+
+        assertThat(updated.getAmount()).isEqualTo(newAmount);
+        assertThat(updated.getDate()).isEqualTo(TODAY.minusDays(1));
+        assertThat(updated.getDescription()).isEqualTo("Flat");
+        assertThat(updated.getCategory()).isSameAs(rent);
+    }
+
+    @Test
+    void update_shouldNotSave_whenExpenseDoesNotExist() {
+        UUID missingId = UUID.randomUUID();
+        when(expenseRepository.findById(missingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.update(missingId, AMOUNT, TODAY, "Lunch", FOOD.getId()))
+                .isInstanceOf(ExpenseNotFoundException.class);
+        verify(expenseRepository, never()).save(any());
+    }
+
+    @Test
+    void update_shouldKeepExpenseUnchanged_whenCategoryDoesNotExist() {
+        Expense expense = new Expense(AMOUNT, TODAY, "Lunch", FOOD, CLOCK);
+        UUID missingCategoryId = UUID.randomUUID();
+        when(expenseRepository.findById(expense.getId())).thenReturn(Optional.of(expense));
+        when(categoryService.findById(missingCategoryId)).thenThrow(new CategoryNotFoundException(missingCategoryId));
+
+        assertThatThrownBy(() -> service.update(expense.getId(), Money.of("1.00", "UAH"), TODAY, "Flat",
+                missingCategoryId))
+                .isInstanceOf(CategoryNotFoundException.class);
+        assertThat(expense.getAmount()).isEqualTo(AMOUNT);
+        verify(expenseRepository, never()).save(any());
+    }
+
+    @Test
+    void delete_shouldRemoveExpense_whenItExists() {
+        Expense expense = new Expense(AMOUNT, TODAY, "Lunch", FOOD, CLOCK);
+        when(expenseRepository.findById(expense.getId())).thenReturn(Optional.of(expense));
+
+        service.delete(expense.getId());
+
+        verify(expenseRepository).deleteById(expense.getId());
+    }
+
+    @Test
+    void delete_shouldThrowException_whenExpenseDoesNotExist() {
+        UUID missingId = UUID.randomUUID();
+        when(expenseRepository.findById(missingId)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.delete(missingId))
+                .isInstanceOf(ExpenseNotFoundException.class);
+        verify(expenseRepository, never()).deleteById(any());
+    }
 }
