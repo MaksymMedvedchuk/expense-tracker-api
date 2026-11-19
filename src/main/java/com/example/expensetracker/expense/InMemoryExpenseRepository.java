@@ -1,24 +1,63 @@
 package com.example.expensetracker.expense;
 
-import java.time.LocalDate;
-import java.util.List;
+import com.example.expensetracker.common.Page;
+import com.example.expensetracker.common.PageRequest;
+import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
+
+@Repository
 public class InMemoryExpenseRepository implements ExpenseRepository {
 
-    private final List<Expense> expenses;
+    /**
+     * Id breaks ties between expenses on the same date, so pages stay stable between requests.
+     */
+    private static final Comparator<Expense> NEWEST_FIRST = Comparator.comparing(Expense::getDate).reversed()
+            .thenComparing(Expense::getId);
 
-    public InMemoryExpenseRepository(List<Expense> expenses) {
-        this.expenses = List.copyOf(expenses);
-    }
+    private final Map<UUID, Expense> expenses = new ConcurrentHashMap<>();
 
     @Override
     public List<Expense> findBetween(LocalDate from, LocalDate to) {
-        return expenses.stream()
-                .filter(expense -> isWithin(expense.getDate(), from, to))
-                .toList();
+        return findMatching(new ExpenseFilter(from, to, null));
     }
 
-    private static boolean isWithin(LocalDate date, LocalDate from, LocalDate to) {
-        return !date.isBefore(from) && !date.isAfter(to);
+    @Override
+    public Expense save(Expense expense) {
+        expenses.put(expense.getId(), expense);
+        return expense;
+    }
+
+    @Override
+    public Optional<Expense> findById(UUID id) {
+        return Optional.ofNullable(expenses.get(id));
+    }
+
+    @Override
+    public Page<Expense> findAll(ExpenseFilter filter, PageRequest pageRequest) {
+        List<Expense> matching = findMatching(filter);
+        List<Expense> content = matching.stream()
+                .skip(pageRequest.offset())
+                .limit(pageRequest.size())
+                .toList();
+        return new Page<>(content, pageRequest, matching.size());
+    }
+
+    @Override
+    public void deleteById(UUID id) {
+        expenses.remove(id);
+    }
+
+    private List<Expense> findMatching(ExpenseFilter filter) {
+        return expenses.values().stream()
+                .filter(filter::matches)
+                .sorted(NEWEST_FIRST)
+                .toList();
     }
 }
