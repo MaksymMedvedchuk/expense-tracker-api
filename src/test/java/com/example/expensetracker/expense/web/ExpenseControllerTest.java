@@ -27,9 +27,13 @@ import java.util.List;
 import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -149,6 +153,66 @@ class ExpenseControllerTest {
         assertThatThrownBy(() -> mockMvc.perform(get("/api/v1/expenses").param("size", "101")))
                 .hasRootCauseInstanceOf(IllegalArgumentException.class)
                 .hasRootCauseMessage("size must not exceed 100, but was: 101");
+    }
+
+    @Test
+    void update_shouldReturnUpdatedExpense_whenExpenseExists() throws Exception {
+        Expense expense = new Expense(Money.of("150.50", "UAH"), DATE, "Lunch", FOOD, CLOCK);
+        expense.update(Money.of("200.00", "UAH"), DATE, "Dinner", FOOD, CLOCK);
+        when(expenseService.update(expense.getId(), Money.of("200.00", "UAH"), DATE, "Dinner", FOOD.getId()))
+                .thenReturn(expense);
+
+        mockMvc.perform(put("/api/v1/expenses/{id}", expense.getId()).contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson("200.00", "Dinner", FOOD.getId())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(expense.getId().toString()))
+                .andExpect(jsonPath("$.amount").value(200.00))
+                .andExpect(jsonPath("$.description").value("Dinner"));
+    }
+
+    @Test
+    void update_shouldReturn404_whenExpenseDoesNotExist() throws Exception {
+        UUID missingId = UUID.randomUUID();
+        when(expenseService.update(missingId, Money.of("200.00", "UAH"), DATE, "Dinner", FOOD.getId()))
+                .thenThrow(new ExpenseNotFoundException(missingId));
+
+        mockMvc.perform(put("/api/v1/expenses/{id}", missingId).contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson("200.00", "Dinner", FOOD.getId())))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("expense with id '" + missingId + "' not found"));
+    }
+
+    @Test
+    void update_shouldReturn400_whenCategoryDoesNotExist() throws Exception {
+        UUID expenseId = UUID.randomUUID();
+        UUID missingCategoryId = UUID.randomUUID();
+        when(expenseService.update(expenseId, Money.of("200.00", "UAH"), DATE, "Dinner", missingCategoryId))
+                .thenThrow(new CategoryNotFoundException(missingCategoryId));
+
+        mockMvc.perform(put("/api/v1/expenses/{id}", expenseId).contentType(MediaType.APPLICATION_JSON)
+                        .content(requestJson("200.00", "Dinner", missingCategoryId)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").value("category with id '" + missingCategoryId + "' not found"));
+    }
+
+    @Test
+    void delete_shouldReturn204_whenExpenseExists() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/expenses/{id}", id))
+                .andExpect(status().isNoContent());
+
+        verify(expenseService).delete(id);
+    }
+
+    @Test
+    void delete_shouldReturn404_whenExpenseDoesNotExist() throws Exception {
+        UUID missingId = UUID.randomUUID();
+        doThrow(new ExpenseNotFoundException(missingId)).when(expenseService).delete(missingId);
+
+        mockMvc.perform(delete("/api/v1/expenses/{id}", missingId))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.detail").value("expense with id '" + missingId + "' not found"));
     }
 
     private static String requestJson(String amount, String description, UUID categoryId) {
