@@ -1,22 +1,32 @@
 package com.example.expensetracker.expense.web;
 
+import com.example.expensetracker.common.Page;
+import com.example.expensetracker.common.PageRequest;
+import com.example.expensetracker.common.web.PageResponse;
 import com.example.expensetracker.expense.Expense;
+import com.example.expensetracker.expense.ExpenseFilter;
 import com.example.expensetracker.expense.ExpenseService;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/expenses")
 public class ExpenseController {
+
+    private static final String DEFAULT_PAGE_SIZE = "5";
+    private static final int MAX_PAGE_SIZE = 100;
 
     private final ExpenseService expenseService;
     private final ExpenseMapper expenseMapper;
@@ -40,5 +50,20 @@ public class ExpenseController {
     @GetMapping("/{id}")
     public ExpenseResponse findById(@PathVariable UUID id) {
         return expenseMapper.toResponse(expenseService.findById(id));
+    }
+
+    @GetMapping
+    public PageResponse<ExpenseResponse> findAll(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to,
+            @RequestParam(required = false) UUID categoryId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = DEFAULT_PAGE_SIZE) int size) {
+        if (size > MAX_PAGE_SIZE) {
+            throw new IllegalArgumentException("size must not exceed " + MAX_PAGE_SIZE + ", but was: " + size);
+        }
+        Page<Expense> expenses = expenseService.findAll(
+                new ExpenseFilter(from, to, categoryId), new PageRequest(page, size));
+        return PageResponse.from(expenses, expenseMapper::toResponse);
     }
 }
