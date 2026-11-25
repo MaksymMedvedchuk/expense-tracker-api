@@ -7,13 +7,17 @@ import com.example.expensetracker.expense.Expense;
 import com.example.expensetracker.expense.ExpenseFilter;
 import com.example.expensetracker.expense.ExpenseService;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
@@ -65,5 +69,18 @@ public class ExpenseController {
         Page<Expense> expenses = expenseService.findAll(
                 new ExpenseFilter(from, to, categoryId), new PageRequest(page, size));
         return PageResponse.from(expenses, expenseMapper::toResponse);
+    }
+
+    @PutMapping("/{id}")
+    public ExpenseResponse update(@PathVariable UUID id, @RequestBody ExpenseRequest request) {
+        Expense updated = expenseService.update(
+                id, expenseMapper.toMoney(request), request.date(), request.description(), request.categoryId());
+        return expenseMapper.toResponse(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@PathVariable UUID id) {
+        expenseService.delete(id);
     }
 }
