@@ -10,7 +10,7 @@ import org.springframework.context.annotation.Configuration;
 class CategoryConfig {
 
     @Bean
-    CategoryService categoryService(CategoryRepository categoryRepository) {
-        return new CategoryService(categoryRepository);
+    CategoryService categoryService(CategoryRepository categoryRepository, CategoryUsage categoryUsage) {
+        return new CategoryService(categoryRepository, categoryUsage);
     }
 }

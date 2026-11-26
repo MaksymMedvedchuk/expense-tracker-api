@@ -1,6 +1,7 @@
 package com.example.expensetracker.category.web;
 
 import com.example.expensetracker.category.Category;
+import com.example.expensetracker.category.CategoryInUseException;
 import com.example.expensetracker.category.CategoryNotFoundException;
 import com.example.expensetracker.category.CategoryService;
 import com.example.expensetracker.category.CategoryType;
@@ -171,5 +172,15 @@ class CategoryControllerTest {
 
         mockMvc.perform(delete("/api/v1/categories/{id}", id))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void delete_shouldReturn409_whenCategoryIsInUse() throws Exception {
+        UUID id = UUID.randomUUID();
+        doThrow(new CategoryInUseException(id)).when(categoryService).delete(id);
+
+        mockMvc.perform(delete("/api/v1/categories/{id}", id))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.detail").value("category with id '" + id + "' is used by expenses"));
     }
 }

@@ -54,6 +54,12 @@ public class InMemoryExpenseRepository implements ExpenseRepository {
         expenses.remove(id);
     }
 
+    @Override
+    public boolean existsByCategoryId(UUID categoryId) {
+        return expenses.values().stream()
+                .anyMatch(expense -> expense.getCategory().getId().equals(categoryId));
+    }
+
     private List<Expense> findMatching(ExpenseFilter filter) {
         return expenses.values().stream()
                 .filter(filter::matches)

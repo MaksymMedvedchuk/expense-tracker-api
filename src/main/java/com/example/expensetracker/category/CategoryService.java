@@ -7,9 +7,11 @@ import java.util.UUID;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final CategoryUsage categoryUsage;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+    public CategoryService(CategoryRepository categoryRepository, CategoryUsage categoryUsage) {
         this.categoryRepository = Objects.requireNonNull(categoryRepository, "categoryRepository must not be null");
+        this.categoryUsage = Objects.requireNonNull(categoryUsage, "categoryUsage must not be null");
     }
 
     public Category create(String name, CategoryType type) {
@@ -41,6 +43,9 @@ public class CategoryService {
 
     public void delete(UUID id) {
         findById(id);
+        if (categoryUsage.isInUse(id)) {
+            throw new CategoryInUseException(id);
+        }
         categoryRepository.deleteById(id);
     }
 }

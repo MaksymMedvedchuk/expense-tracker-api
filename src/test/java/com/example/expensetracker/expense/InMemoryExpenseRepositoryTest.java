@@ -95,6 +95,24 @@ class InMemoryExpenseRepositoryTest {
         assertThat(repository.findById(expense.getId())).isEmpty();
     }
 
+    @Test
+    void existsByCategoryId_shouldReturnTrue_whenExpenseReferencesCategory() {
+        repository.save(expenseOn(FROM, FOOD));
+
+        boolean exists = repository.existsByCategoryId(FOOD.getId());
+
+        assertThat(exists).isTrue();
+    }
+
+    @Test
+    void existsByCategoryId_shouldReturnFalse_whenOnlyOtherCategoriesAreReferenced() {
+        repository.save(expenseOn(FROM, RENT));
+
+        boolean exists = repository.existsByCategoryId(FOOD.getId());
+
+        assertThat(exists).isFalse();
+    }
+
     private static Expense expenseOn(LocalDate date, Category category) {
         return new Expense(Money.of("100.00", "UAH"), date, "Expense", category, CLOCK);
     }
