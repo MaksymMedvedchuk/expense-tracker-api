@@ -27,18 +27,28 @@ class CategoryServiceTest {
     @Mock
     private CategoryRepository categoryRepository;
 
+    @Mock
+    private CategoryUsage categoryUsage;
+
     private CategoryService service;
 
     @BeforeEach
     void setUp() {
-        service = new CategoryService(categoryRepository);
+        service = new CategoryService(categoryRepository, categoryUsage);
     }
 
     @Test
     void constructor_shouldThrowException_whenRepositoryIsNull() {
-        assertThatThrownBy(() -> new CategoryService(null))
+        assertThatThrownBy(() -> new CategoryService(null, categoryUsage))
                 .isInstanceOf(NullPointerException.class)
                 .hasMessage("categoryRepository must not be null");
+    }
+
+    @Test
+    void constructor_shouldThrowException_whenCategoryUsageIsNull() {
+        assertThatThrownBy(() -> new CategoryService(categoryRepository, null))
+                .isInstanceOf(NullPointerException.class)
+                .hasMessage("categoryUsage must not be null");
     }
 
     @ParameterizedTest
@@ -154,6 +164,18 @@ class CategoryServiceTest {
 
         assertThatThrownBy(() -> service.delete(id))
                 .isInstanceOf(CategoryNotFoundException.class);
+        verify(categoryRepository, never()).deleteById(any());
+    }
+
+    @Test
+    void delete_shouldThrowException_whenCategoryIsInUse() {
+        Category category = new Category("Food", CategoryType.VARIABLE);
+        when(categoryRepository.findById(category.getId())).thenReturn(Optional.of(category));
+        when(categoryUsage.isInUse(category.getId())).thenReturn(true);
+
+        assertThatThrownBy(() -> service.delete(category.getId()))
+                .isInstanceOf(CategoryInUseException.class)
+                .hasMessage("category with id '" + category.getId() + "' is used by expenses");
         verify(categoryRepository, never()).deleteById(any());
     }
 }

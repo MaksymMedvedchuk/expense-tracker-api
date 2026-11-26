@@ -1,5 +1,6 @@
 package com.example.expensetracker.category.web;
 
+import com.example.expensetracker.category.CategoryInUseException;
 import com.example.expensetracker.category.CategoryNotFoundException;
 import com.example.expensetracker.category.DuplicateCategoryNameException;
 import com.example.expensetracker.common.BusinessRuleViolationException;
@@ -22,6 +23,11 @@ public class CategoryExceptionHandler {
 
     @ExceptionHandler(DuplicateCategoryNameException.class)
     public ProblemDetail handleDuplicateName(DuplicateCategoryNameException exception) {
+        return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
+    }
+
+    @ExceptionHandler(CategoryInUseException.class)
+    public ProblemDetail handleInUse(CategoryInUseException exception) {
         return ProblemDetail.forStatusAndDetail(HttpStatus.CONFLICT, exception.getMessage());
     }
 

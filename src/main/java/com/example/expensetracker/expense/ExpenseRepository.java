@@ -25,4 +25,6 @@ public interface ExpenseRepository {
     Page<Expense> findAll(ExpenseFilter filter, PageRequest pageRequest);
 
     void deleteById(UUID id);
+
+    boolean existsByCategoryId(UUID categoryId);
 }

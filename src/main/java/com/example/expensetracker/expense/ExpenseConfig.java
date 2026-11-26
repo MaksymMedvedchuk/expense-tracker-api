@@ -1,6 +1,7 @@
 package com.example.expensetracker.expense;
 
 import com.example.expensetracker.category.CategoryService;
+import com.example.expensetracker.category.CategoryUsage;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -15,5 +16,10 @@ class ExpenseConfig {
     @Bean
     ExpenseService expenseService(ExpenseRepository expenseRepository, CategoryService categoryService, Clock clock) {
         return new ExpenseService(expenseRepository, categoryService, clock);
+    }
+
+    @Bean
+    CategoryUsage categoryUsage(ExpenseRepository expenseRepository) {
+        return new ExpenseCategoryUsage(expenseRepository);
     }
 }
